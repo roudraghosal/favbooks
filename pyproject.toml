@@ -1,0 +1,9 @@
+[tool.pylance]
+include = ["backend", "ml"]
+extraPaths = ["backend", "ml"]
+
+[tool.pyright]
+include = ["backend", "ml"]
+extraPaths = ["backend", "ml"]
+pythonVersion = "3.13"
+pythonPlatform = "Windows"

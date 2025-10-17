@@ -1,0 +1,23 @@
+{
+    "typeCheckingMode": "basic",
+    "reportGeneralTypeIssues": "warning",
+    "reportOptionalMemberAccess": "warning",
+    "reportOptionalSubscript": "warning",
+    "reportOptionalCall": "warning",
+    "reportOptionalIterable": "warning",
+    "reportOptionalContextManager": "warning",
+    "reportOptionalOperand": "warning",
+    "reportArgumentType": "warning",
+    "reportAssignmentType": "warning",
+    "reportAttributeAccessIssue": "warning",
+    "reportCallIssue": "warning",
+    "reportIncompatibleMethodOverride": "warning",
+    "reportIncompatibleVariableOverride": "warning",
+    "reportInconsistentConstructor": "warning",
+    "reportIndexIssue": "warning",
+    "reportInvalidTypeForm": "warning",
+    "reportOperatorIssue": "warning",
+    "reportReturnType": "warning",
+    "stubPath": "",
+    "pythonVersion": "3.13"
+}

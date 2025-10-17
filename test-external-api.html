@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test External Books API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #121212;
+            color: #fff;
+        }
+
+        h1 {
+            color: #1db954;
+        }
+
+        button {
+            background: #1db954;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #1ed760;
+        }
+
+        #results {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: #282828;
+            padding: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: scale(1.05);
+        }
+
+        .book-card img {
+            width: 100%;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .book-card h3 {
+            font-size: 14px;
+            margin: 10px 0 5px 0;
+            color: #fff;
+        }
+
+        .book-card p {
+            font-size: 12px;
+            color: #b3b3b3;
+            margin: 5px 0;
+        }
+
+        .read-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        #status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: #282828;
+        }
+
+        .success {
+            color: #1db954;
+        }
+
+        .error {
+            color: #e22134;
+        }
+
+        .loading {
+            color: #ffa500;
+        }
+
+        input {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background: #282828;
+            color: #fff;
+            width: 300px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📚 External Books API Test</h1>
+
+    <div>
+        <h2>Quick Tests:</h2>
+        <button onclick="testTrending()">🔥 Test Trending Books</button>
+        <button onclick="testSearch('Python programming')">🔍 Search: Python</button>
+        <button onclick="testSearch('Harry Potter')">⚡ Search: Harry Potter</button>
+        <button onclick="testGenre('fiction')">📖 Genre: Fiction</button>
+        <button onclick="testGenre('science fiction')">🚀 Genre: Sci-Fi</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h2>Custom Search:</h2>
+        <input type="text" id="searchInput" placeholder="Enter book title or author..." />
+        <button onclick="testSearch(document.getElementById('searchInput').value)">Search</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<span class="${type}">${message}</span>`;
+        }
+
+        function displayBooks(books, title) {
+            const results = document.getElementById('results');
+
+            if (!books || books.length === 0) {
+                results.innerHTML = '<p>No books found.</p>';
+                showStatus('No results found', 'error');
+                return;
+            }
+
+            let html = `<h2>${title} (${books.length} books)</h2><div style="display: contents;">`;
+
+            books.forEach(book => {
+                const cover = book.cover_url || 'https://via.placeholder.com/200x300?text=No+Cover';
+                const previewLink = book.preview_link || book.info_link || '#';
+                const rating = book.average_rating ? `⭐ ${book.average_rating.toFixed(1)}` : '';
+                const source = book.source === 'google_books' ? '📚 Google Books' : '📖 Open Library';
+
+                html += `
+                    <div class="book-card">
+                        <img src="${cover}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Cover'">
+                        <h3>${book.title}</h3>
+                        <p><strong>${book.author || 'Unknown Author'}</strong></p>
+                        <p>${rating}</p>
+                        <p style="font-size: 10px;">${source}</p>
+                        <button class="read-btn" onclick="window.open('${previewLink}', '_blank')">
+                            📖 Read Book
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            results.innerHTML = html;
+            showStatus(`✅ Successfully loaded ${books.length} books!`, 'success');
+        }
+
+        async function testTrending() {
+            showStatus('⏳ Loading trending books...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/books/external/trending`);
+                const data = await response.json();
+                displayBooks(data, '🔥 Trending Books');
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('results').innerHTML = `
+                    <div style="color: #e22134; padding: 20px;">
+                        <h3>Error loading trending books</h3>
+                        <p>Make sure the backend server is running on port 8000</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testSearch(query) {
+            if (!query || !query.trim()) {
+                showStatus('Please enter a search query', 'error');
+                return;
+            }
+
+            showStatus(`⏳ Searching for "${query}"...`, 'loading');
+            try {
+                const response = await fetch(
+                    `${API_BASE}/books/external/search?query=${encodeURIComponent(query)}&source=google&limit=24`
+                );
+                const data = await response.json();
+                displayBooks(data, `🔍 Search Results: "${query}"`);
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('results').innerHTML = `
+                    <div style="color: #e22134; padding: 20px;">
+                        <h3>Search failed</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testGenre(genre) {
+            showStatus(`⏳ Loading ${genre} books...`, 'loading');
+            try {
+                const response = await fetch(
+                    `${API_BASE}/books/external/genre/${encodeURIComponent(genre)}?limit=24`
+                );
+                const data = await response.json();
+                displayBooks(data, `📚 ${genre.charAt(0).toUpperCase() + genre.slice(1)} Books`);
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                document.getElementById('results').innerHTML = `
+                    <div style="color: #e22134; padding: 20px;">
+                        <h3>Error loading genre</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            showStatus('Ready! Click any button to test the API', 'success');
+        });
+    </script>
+</body>
+
+</html>
