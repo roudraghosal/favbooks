@@ -1,3 +1,12 @@
+import os
+import sys
+
+# Ensure the backend directory is on the Python path when the app is launched
+# from a parent directory (e.g., Render deployment start command).
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+if CURRENT_DIR not in sys.path:
+    sys.path.append(CURRENT_DIR)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
