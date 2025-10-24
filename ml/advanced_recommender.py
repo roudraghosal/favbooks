@@ -99,13 +99,13 @@ class ContentBasedRecommender:
             return []
         
         idx = self.book_indices[book_id]
-        sim_scores = cosine_similarity(self.tfidf_matrix[idx:idx+1], self.tfidf_matrix).flatten()
+        sim_scores = cosine_similarity(self.tfidf_matrix[idx:idx+1], self.tfidf_matrix).flatten()  # type: ignore[index]
         sim_indices = sim_scores.argsort()[::-1][1:n+1]
         
         recommendations = []
         for i in sim_indices:
             if i < len(self.book_features):
-                rec_book_id = self.book_features.iloc[i]['id']
+                rec_book_id = int(self.book_features.iloc[i]['id'])  # type: ignore[call-overload]
                 recommendations.append((rec_book_id, float(sim_scores[i])))
         
         return recommendations

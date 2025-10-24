@@ -5,7 +5,8 @@ from app.core.database import get_db
 from app.core.security import (
     authenticate_user,
     create_access_token,
-    get_password_hash
+    get_password_hash,
+    get_current_user,
 )
 from app.core.config import settings
 from app.models import User
@@ -63,4 +64,14 @@ async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user,
+    }
+
+
+@router.get("/me", response_model=UserSchema)
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    """Return authenticated user profile"""
+    return current_user

@@ -12,6 +12,22 @@ const BookCard = ({ book, showRemoveFromWishlist = false, onWishlistChange }) =>
     const [audio, setAudio] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Create proxied image URL to fix CORS and mixed content issues
+    const getProxiedImageUrl = (url) => {
+        if (!url) return null;
+        // Convert http to https for Google Books
+        if (url.startsWith('http://books.google.com')) {
+            return url.replace('http://', 'https://');
+        }
+        // If still http (other sources), proxy it through backend
+        if (url.startsWith('http://')) {
+            return `http://localhost:8000/api/images/cover?url=${encodeURIComponent(url)}`;
+        }
+        return url;
+    };
+
+    const coverImageUrl = getProxiedImageUrl(book.cover_image_url);
+
     const handleWishlistToggle = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -113,11 +129,12 @@ const BookCard = ({ book, showRemoveFromWishlist = false, onWishlistChange }) =>
             <div className="card card-hover group relative overflow-hidden">
                 {/* Book Cover */}
                 <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-lg bg-gradient-to-br from-gray-800 to-gray-900">
-                    {book.cover_image_url ? (
+                    {coverImageUrl ? (
                         <img
-                            src={book.cover_image_url}
+                            src={coverImageUrl}
                             alt={book.title}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
                             onError={(e) => {
                                 e.target.style.display = 'none';
                                 e.target.nextSibling.style.display = 'flex';
@@ -128,9 +145,14 @@ const BookCard = ({ book, showRemoveFromWishlist = false, onWishlistChange }) =>
                     {/* Fallback when image fails to load */}
                     <div
                         className="w-full h-full flex items-center justify-center text-center p-4"
-                        style={{ display: book.cover_image_url ? 'none' : 'flex' }}
+                        style={{ display: coverImageUrl ? 'none' : 'flex' }}
                     >
                         <div>
+                            <div className="mb-3">
+                                <svg className="w-16 h-16 mx-auto text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                                </svg>
+                            </div>
                             <h3 className="text-white font-semibold text-sm mb-1">{book.title}</h3>
                             <p className="text-spotify-light-gray text-xs">{book.author}</p>
                         </div>
@@ -153,8 +175,8 @@ const BookCard = ({ book, showRemoveFromWishlist = false, onWishlistChange }) =>
                             onClick={handleWishlistToggle}
                             disabled={loading}
                             className={`p-3 rounded-full transition-all duration-200 ${isInWishlist || showRemoveFromWishlist
-                                    ? 'bg-red-500 text-white hover:bg-red-600'
-                                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
                                 }`}
                         >
                             <FiHeart

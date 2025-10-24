@@ -22,6 +22,7 @@ class User(UserBase):
     id: int
     is_admin: bool
     created_at: datetime
+    avatar_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -30,6 +31,7 @@ class User(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: Optional[User] = None
 
 
 class TokenData(BaseModel):

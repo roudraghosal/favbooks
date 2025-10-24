@@ -16,7 +16,7 @@ from app.schemas.achievements import (
     ChallengeParticipationResponse, Quiz as QuizSchema, QuizCreate,
     QuizAttemptCreate, QuizAttemptResponse, StickerGenerateRequest,
     StickerResponse, UserStatsResponse, UserProgressResponse,
-    ShareStickerRequest, ShareStickerResponse
+    ShareStickerRequest, ShareStickerResponse, AchievementProgressResponse
 )
 from app.services.milestone_tracker import MilestoneTracker
 from app.services.sticker_generator import sticker_generator
@@ -25,14 +25,23 @@ import json
 router = APIRouter()
 
 
+def _model_validate(model_cls, data, *, from_attributes: bool = False):
+    """Compatibility helper for Pydantic v1/v2 model validation."""
+    if hasattr(model_cls, "model_validate"):
+        return model_cls.model_validate(data, from_attributes=from_attributes)  # type: ignore[attr-defined]
+    if from_attributes and hasattr(model_cls, "from_orm"):
+        return model_cls.from_orm(data)  # type: ignore[attr-defined]
+    return model_cls.parse_obj(data)  # type: ignore[attr-defined]
+
+
 @router.get("/stats", response_model=UserStatsResponse)
-async def get_user_stats(
+async def get_user_stats_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get comprehensive user statistics"""
     tracker = MilestoneTracker(db)
-    stats = tracker.get_user_stats(current_user.id)
+    stats = tracker.get_user_stats(current_user.id)  # type: ignore[arg-type]
     
     return UserStatsResponse(
         books_read=stats.get("books_read", 0),
@@ -47,13 +56,13 @@ async def get_user_stats(
 
 
 @router.get("/achievements", response_model=List[Achievement])
-async def get_user_achievements(
+async def get_user_achievements_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all unlocked achievements for the current user"""
     tracker = MilestoneTracker(db)
-    achievements = tracker.get_user_achievements(current_user.id)
+    achievements = tracker.get_user_achievements(current_user.id)  # type: ignore[arg-type]
     return achievements
 
 
@@ -64,7 +73,7 @@ async def check_achievements(
 ):
     """Check and unlock new achievements"""
     tracker = MilestoneTracker(db)
-    newly_unlocked = tracker.check_and_unlock_achievements(current_user.id)
+    newly_unlocked = tracker.check_and_unlock_achievements(current_user.id)  # type: ignore[arg-type]
     
     return {
         "newly_unlocked": len(newly_unlocked),
@@ -88,28 +97,45 @@ async def get_achievement_progress(
     """Get detailed progress towards all achievements"""
     tracker = MilestoneTracker(db)
     
-    stats = tracker.get_user_stats(current_user.id)
-    achievements = tracker.get_user_achievements(current_user.id)
-    progress = tracker.get_achievement_progress(current_user.id)
+    stats = tracker.get_user_stats(current_user.id)  # type: ignore[arg-type]
+    achievements = tracker.get_user_achievements(current_user.id)  # type: ignore[arg-type]
+    progress = tracker.get_achievement_progress(current_user.id)  # type: ignore[arg-type]
     
     streak = db.query(UserStreak).filter(
         UserStreak.user_id == current_user.id
     ).first()
     
+    stats_model = UserStatsResponse(
+        books_read=stats.get("books_read", 0),
+        reviews_written=stats.get("reviews_written", 0),
+        streak_days=stats.get("streak_days", 0),
+        quiz_score=stats.get("quiz_score", 0),
+        challenges_completed=stats.get("challenges_completed", 0),
+        genres_explored=stats.get("genres_explored", 0),
+        ratings_given=stats.get("ratings_given", 0),
+        wishlist_size=stats.get("wishlist_size", 0)
+    )
+
+    achievement_models = [
+        _model_validate(Achievement, a, from_attributes=True)
+        for a in achievements
+    ] if achievements else []
+
+    progress_models = {
+        badge: _model_validate(AchievementProgressResponse, data)
+        for badge, data in progress.items()
+    }
+
+    streak_model = (
+        _model_validate(UserStreakResponse, streak, from_attributes=True)
+        if streak is not None else None
+    )
+
     return UserProgressResponse(
-        stats=UserStatsResponse(
-            books_read=stats.get("books_read", 0),
-            reviews_written=stats.get("reviews_written", 0),
-            streak_days=stats.get("streak_days", 0),
-            quiz_score=stats.get("quiz_score", 0),
-            challenges_completed=stats.get("challenges_completed", 0),
-            genres_explored=stats.get("genres_explored", 0),
-            ratings_given=stats.get("ratings_given", 0),
-            wishlist_size=stats.get("wishlist_size", 0)
-        ),
-        achievements=achievements,
-        progress=progress,
-        streak=streak
+        stats=stats_model,
+        achievements=achievement_models,
+        progress=progress_models,
+        streak=streak_model
     )
 
 
@@ -137,16 +163,16 @@ async def get_reading_streak(
 
 
 @router.post("/streak/update", response_model=UserStreakResponse)
-async def update_reading_streak(
+async def update_reading_streak_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update reading streak (called when user completes a reading activity)"""
     tracker = MilestoneTracker(db)
-    streak = tracker.update_reading_streak(current_user.id)
+    streak = tracker.update_reading_streak(current_user.id)  # type: ignore[arg-type]
     
     # Check for new achievements
-    tracker.check_and_unlock_achievements(current_user.id)
+    tracker.check_and_unlock_achievements(current_user.id)  # type: ignore[arg-type]
     
     return streak
 
@@ -231,7 +257,7 @@ async def submit_quiz_attempt(
     
     try:
         quiz_attempt = tracker.record_quiz_attempt(
-            user_id=current_user.id,
+            user_id=current_user.id,  # type: ignore[arg-type]
             quiz_id=attempt.quiz_id,
             score=attempt.score
         )
@@ -258,12 +284,12 @@ async def generate_sticker(
     
     # Generate sticker
     sticker_data = sticker_generator.generate_badge_sticker(
-        username=current_user.username,
-        badge_type=achievement.badge_type.value,
-        milestone_value=achievement.milestone_value,
-        milestone_type=achievement.milestone_type.value,
-        avatar_url=current_user.avatar_url,
-        unlocked_at=achievement.unlocked_at
+        username=str(current_user.username),  # type: ignore[arg-type]
+        badge_type=str(achievement.badge_type.value),
+        milestone_value=achievement.milestone_value,  # type: ignore[arg-type]
+        milestone_type=str(achievement.milestone_type.value),
+        avatar_url=str(current_user.avatar_url) if current_user.avatar_url is not None else None,  # type: ignore[arg-type]
+        unlocked_at=achievement.unlocked_at  # type: ignore[arg-type]
     )
     
     # Save sticker record
@@ -279,16 +305,16 @@ async def generate_sticker(
     db.refresh(sticker_record)
     
     return StickerResponse(
-        id=sticker_record.id,
-        sticker_type=sticker_record.sticker_type,
-        sticker_url=sticker_record.sticker_url,
+        id=sticker_record.id,  # type: ignore[arg-type]
+        sticker_type=sticker_record.sticker_type,  # type: ignore[arg-type]
+        sticker_url=sticker_record.sticker_url,  # type: ignore[arg-type]
         image_data=sticker_data["image"],
         width=sticker_data["width"],
         height=sticker_data["height"],
         format=sticker_data["format"],
         metadata=sticker_data["metadata"],
-        download_count=sticker_record.download_count,
-        created_at=sticker_record.created_at
+        download_count=sticker_record.download_count,  # type: ignore[arg-type]
+        created_at=sticker_record.created_at  # type: ignore[arg-type]
     )
 
 
@@ -307,10 +333,16 @@ async def download_sticker(
     if not sticker:
         raise HTTPException(status_code=404, detail="Sticker not found")
     
-    sticker.download_count += 1
+    from sqlalchemy import update
+    db.execute(
+        update(StickerGeneration)
+        .where(StickerGeneration.id == sticker_id)
+        .values(download_count=StickerGeneration.download_count + 1)
+    )
     db.commit()
+    db.refresh(sticker)
     
-    return {"message": "Download tracked", "download_count": sticker.download_count}
+    return {"message": "Download tracked", "download_count": sticker.download_count}  # type: ignore[arg-type,dict-item]
 
 
 @router.post("/stickers/{sticker_id}/share", response_model=ShareStickerResponse)
@@ -330,13 +362,16 @@ async def share_sticker(
         raise HTTPException(status_code=404, detail="Sticker not found")
     
     # Update achievement share count
-    if sticker.achievement_id:
-        achievement = db.query(UserAchievement).filter(
-            UserAchievement.id == sticker.achievement_id
-        ).first()
-        if achievement:
-            achievement.is_shared = True
-            achievement.share_count += 1
+    if sticker.achievement_id is not None:  # type: ignore[comparison-overlap]
+        from sqlalchemy import update
+        db.execute(
+            update(UserAchievement)
+            .where(UserAchievement.id == sticker.achievement_id)
+            .values(
+                is_shared=True,
+                share_count=UserAchievement.share_count + 1
+            )
+        )
     
     db.commit()
     
@@ -362,18 +397,18 @@ async def get_my_stickers(
     
     result = []
     for sticker in stickers:
-        metadata = json.loads(sticker.sticker_data) if sticker.sticker_data else {}
+        metadata = json.loads(sticker.sticker_data) if sticker.sticker_data else {}  # type: ignore[arg-type]
         result.append(StickerResponse(
-            id=sticker.id,
-            sticker_type=sticker.sticker_type,
-            sticker_url=sticker.sticker_url,
+            id=sticker.id,  # type: ignore[arg-type]
+            sticker_type=sticker.sticker_type,  # type: ignore[arg-type]
+            sticker_url=sticker.sticker_url,  # type: ignore[arg-type]
             image_data=None,  # Don't send full image data in list view
             width=1080,
             height=1920,
             format="png",
             metadata=metadata,
-            download_count=sticker.download_count,
-            created_at=sticker.created_at
+            download_count=sticker.download_count,  # type: ignore[arg-type]
+            created_at=sticker.created_at  # type: ignore[arg-type]
         ))
     
     return result

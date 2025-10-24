@@ -195,20 +195,23 @@ async def enrich_book_data(
             raise HTTPException(status_code=404, detail="Book not found")
         
         # Get external data
-        external_data = await ExternalBookAPI.enrich_book_data(book.title, book.author)
+        external_data = await ExternalBookAPI.enrich_book_data(str(book.title), str(book.author))
         
         if not external_data:
             return {"message": "No external data found for this book"}
         
         # Update book with external data
-        if not book.description and external_data.get("description"):
-            book.description = external_data["description"]
+        desc = getattr(book, 'description', None)
+        if not desc and external_data.get("description"):
+            book.description = external_data["description"]  # type: ignore
         
-        if not book.cover_image_url and external_data.get("cover_image_url"):
-            book.cover_image_url = external_data["cover_image_url"]
+        cover = getattr(book, 'cover_image_url', None)
+        if not cover and external_data.get("cover_image_url"):
+            book.cover_image_url = external_data["cover_image_url"]  # type: ignore
         
-        if not book.isbn and external_data.get("isbn"):
-            book.isbn = external_data["isbn"]
+        isbn = getattr(book, 'isbn', None)
+        if not isbn and external_data.get("isbn"):
+            book.isbn = external_data["isbn"]  # type: ignore
         
         if not book.publisher and external_data.get("publisher"):
             book.publisher = external_data["publisher"]

@@ -59,7 +59,7 @@ class ExternalBookAPI:
         cache_key = cls._get_cache_key("google", query)
         cached_data = cls._get_from_cache(cache_key)
         
-        if cached_data:
+        if cached_data and isinstance(cached_data, list):
             logger.info(f"Returning cached Google Books results for: {query}")
             return cached_data
         
@@ -105,7 +105,7 @@ class ExternalBookAPI:
                     }
                     books.append(book)
                 
-                cls._set_cache(cache_key, books)
+                cls._set_cache(cache_key, books)  # type: ignore[arg-type]
                 logger.info(f"Fetched {len(books)} books from Google Books API")
                 return books
                 
@@ -125,10 +125,10 @@ class ExternalBookAPI:
         Returns:
             List of book dictionaries
         """
-        cache_key = cls._get_cache_key("openlibrary", query)
+        cache_key = cls._get_cache_key("open_library", query)
         cached_data = cls._get_from_cache(cache_key)
         
-        if cached_data:
+        if cached_data and isinstance(cached_data, list):
             logger.info(f"Returning cached Open Library results for: {query}")
             return cached_data
         
@@ -170,7 +170,7 @@ class ExternalBookAPI:
                     }
                     books.append(book)
                 
-                cls._set_cache(cache_key, books)
+                cls._set_cache(cache_key, books)  # type: ignore[arg-type]
                 logger.info(f"Fetched {len(books)} books from Open Library API")
                 return books
                 

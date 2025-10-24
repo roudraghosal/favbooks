@@ -68,8 +68,8 @@ async def create_rating(
     
     # Update reading streak and check for achievements
     tracker = MilestoneTracker(db)
-    tracker.update_reading_streak(current_user.id)
-    newly_unlocked = tracker.check_and_unlock_achievements(current_user.id)
+    tracker.update_reading_streak(current_user.id)  # type: ignore[arg-type]
+    newly_unlocked = tracker.check_and_unlock_achievements(current_user.id)  # type: ignore[arg-type]
     
     # Add newly unlocked achievements to response
     response_data = db_rating.__dict__.copy()

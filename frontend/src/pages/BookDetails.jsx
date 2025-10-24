@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { booksAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 
 const BookDetails = () => {
@@ -35,12 +35,13 @@ const BookDetails = () => {
 
     const fetchBookContent = async () => {
         try {
-            const response = await api.get(`/books/${id}/preview`);
+            const response = await booksAPI.getBookPreview(id);
             setBookContent(response.data);
             setIsReading(true);
         } catch (err) {
             console.error('Error fetching book content:', err);
-            alert('Failed to load book content');
+            const errorMessage = err.response?.data?.detail || 'Failed to load book preview. Please try again.';
+            alert(errorMessage);
         }
     };
 
@@ -52,9 +53,14 @@ const BookDetails = () => {
             return;
         }
 
+        if (userRating === 0) {
+            alert('Please select a rating');
+            return;
+        }
+
         try {
             await api.post(
-                '/ratings/',
+                '/ratings',
                 {
                     book_id: parseInt(id),
                     rating: userRating,
@@ -68,7 +74,8 @@ const BookDetails = () => {
             fetchBookDetails(); // Refresh book data
         } catch (err) {
             console.error('Error submitting rating:', err);
-            alert('Failed to submit rating. Please try again.');
+            const errorMessage = err.response?.data?.detail || 'Failed to submit rating. Please try again.';
+            alert(errorMessage);
         }
     };
 

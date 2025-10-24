@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { FiAward, FiTrendingUp, FiTarget, FiStar, FiDownload, FiShare2, FiInstagram, FiTwitter } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FiAward, FiTarget, FiStar, FiDownload, FiShare2, FiInstagram, FiTwitter } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import achievementsAPI from '../services/achievementsAPI';
+import { useAuth } from '../contexts/AuthContext';
 
 const AchievementsDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -13,12 +14,13 @@ const AchievementsDashboard = () => {
     const [generatedSticker, setGeneratedSticker] = useState(null);
     const [showStickerModal, setShowStickerModal] = useState(false);
     const [generatingSticker, setGeneratingSticker] = useState(false);
+    const { isAuthenticated, loading: authLoading, user } = useAuth();
 
-    useEffect(() => {
-        loadDashboardData();
-    }, []);
+    const loadDashboardData = useCallback(async () => {
+        if (!isAuthenticated()) {
+            return;
+        }
 
-    const loadDashboardData = async () => {
         try {
             setLoading(true);
             const [statsData, achievementsData, progressData, streakData] = await Promise.all([
@@ -37,7 +39,13 @@ const AchievementsDashboard = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            loadDashboardData();
+        }
+    }, [authLoading, user?.id, loadDashboardData]);
 
     const handleCheckAchievements = async () => {
         try {
@@ -146,10 +154,20 @@ const AchievementsDashboard = () => {
         return colors[badgeType] || 'from-gray-600 to-gray-700';
     };
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
                 <div className="text-white text-2xl">Loading achievements...</div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated()) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center px-4 text-center">
+                <div className="text-white text-xl max-w-lg">
+                    Please sign in to view your achievements dashboard.
+                </div>
             </div>
         );
     }

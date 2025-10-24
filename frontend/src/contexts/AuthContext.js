@@ -19,38 +19,97 @@ export const AuthProvider = ({ children }) => {
 
     // Initialize auth state
     useEffect(() => {
-        const initializeAuth = () => {
+        let isMounted = true;
+
+        const initializeAuth = async () => {
             const savedToken = localStorage.getItem('token');
             const savedUser = localStorage.getItem('user');
 
-            if (savedToken && savedUser) {
+            if (!savedToken) {
+                localStorage.removeItem('user');
+                if (isMounted) {
+                    setToken(null);
+                    setUser(null);
+                    setLoading(false);
+                }
+                return;
+            }
+
+            if (isMounted) {
+                setToken(savedToken);
+            }
+
+            let parsedUser = null;
+
+            if (savedUser) {
                 try {
-                    setToken(savedToken);
-                    setUser(JSON.parse(savedUser));
+                    parsedUser = JSON.parse(savedUser);
                 } catch (error) {
                     console.error('Error parsing saved user data:', error);
-                    logout();
                 }
             }
-            setLoading(false);
+
+            if (!parsedUser?.id) {
+                try {
+                    const profileResponse = await authAPI.getProfile();
+                    const refreshedUser = {
+                        token_type: parsedUser?.token_type || 'bearer',
+                        ...profileResponse.data,
+                    };
+                    parsedUser = refreshedUser;
+                    localStorage.setItem('user', JSON.stringify(refreshedUser));
+                } catch (error) {
+                    console.error('Failed to refresh user profile:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    if (isMounted) {
+                        setToken(null);
+                        setUser(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+            }
+
+            if (isMounted) {
+                setUser(parsedUser);
+                setLoading(false);
+            }
         };
 
         initializeAuth();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const login = async (email, password) => {
         try {
             setLoading(true);
             const response = await authAPI.login({ email, password });
-            const { access_token, token_type } = response.data;
+            const { access_token, token_type, user: userPayload } = response.data;
+            const authTokenType = token_type || 'bearer';
 
-            // Store token
+            // Store token for subsequent requests
             localStorage.setItem('token', access_token);
             setToken(access_token);
 
-            // Get user info (we'll need to decode JWT or make another API call)
-            // For now, we'll store basic info
-            const userData = { email, token_type };
+            let resolvedUser = userPayload;
+
+            if (!resolvedUser) {
+                try {
+                    const profileResponse = await authAPI.getProfile();
+                    resolvedUser = profileResponse.data;
+                } catch (profileError) {
+                    console.error('Unable to fetch user profile after login:', profileError);
+                }
+            }
+
+            const userData = resolvedUser
+                ? { ...resolvedUser, token_type: authTokenType }
+                : { email, token_type: authTokenType };
+
             localStorage.setItem('user', JSON.stringify(userData));
             setUser(userData);
 
@@ -58,7 +117,20 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
 
         } catch (error) {
-            const errorMessage = apiHelpers.formatError(error);
+            console.error('Login error:', error);
+            let errorMessage = 'Login failed. Please check your connection and try again.';
+
+            if (error.response) {
+                // Server responded with error
+                errorMessage = apiHelpers.formatError(error);
+            } else if (error.request) {
+                // Request made but no response (network error)
+                errorMessage = 'Network error. Please ensure the backend server is running on port 8000.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || 'An unexpected error occurred';
+            }
+
             toast.error(errorMessage);
             return { success: false, message: errorMessage };
         } finally {
@@ -75,7 +147,20 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
 
         } catch (error) {
-            const errorMessage = apiHelpers.formatError(error);
+            console.error('Registration error:', error);
+            let errorMessage = 'Registration failed. Please check your connection and try again.';
+
+            if (error.response) {
+                // Server responded with error
+                errorMessage = apiHelpers.formatError(error);
+            } else if (error.request) {
+                // Request made but no response (network error)
+                errorMessage = 'Network error. Please ensure the backend server is running on port 8000.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || 'An unexpected error occurred';
+            }
+
             toast.error(errorMessage);
             return { success: false, message: errorMessage };
         } finally {

@@ -3,7 +3,7 @@ Milestone and Achievement Tracking Service
 Automatically tracks user progress and unlocks badges
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, update
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from app.models import User, Rating, Wishlist, Book
@@ -137,10 +137,10 @@ class MilestoneTracker:
         # Quiz score (average of passed quizzes)
         quiz_attempts = self.db.query(QuizAttempt).filter(
             QuizAttempt.user_id == user_id,
-            QuizAttempt.is_passed == True
+            QuizAttempt.is_passed == True  # noqa: E712
         ).all()
         if quiz_attempts:
-            avg_score = sum(attempt.score for attempt in quiz_attempts) / len(quiz_attempts)
+            avg_score = sum(int(attempt.score) for attempt in quiz_attempts) / len(quiz_attempts)  # type: ignore[arg-type]
             stats[MilestoneType.QUIZ_SCORE] = int(avg_score)
         else:
             stats[MilestoneType.QUIZ_SCORE] = 0
@@ -165,23 +165,41 @@ class MilestoneTracker:
             )
             self.db.add(streak)
         else:
-            last_activity = streak.last_activity_date.date() if streak.last_activity_date else None
+            last_activity = streak.last_activity_date.date() if streak.last_activity_date else None  # type: ignore[union-attr]
             
             if last_activity == today:
                 # Already logged activity today
                 pass
             elif last_activity == today - timedelta(days=1):
                 # Consecutive day - increment streak
-                streak.current_streak += 1
-                streak.last_activity_date = datetime.now()
+                self.db.execute(
+                    update(UserStreak)
+                    .where(UserStreak.id == streak.id)
+                    .values(
+                        current_streak=UserStreak.current_streak + 1,
+                        last_activity_date=datetime.now()
+                    )
+                )
+                self.db.flush()
+                self.db.refresh(streak)
                 
                 # Update longest streak if needed
-                if streak.current_streak > streak.longest_streak:
-                    streak.longest_streak = streak.current_streak
+                if streak.current_streak > streak.longest_streak:  # type: ignore[operator]
+                    self.db.execute(
+                        update(UserStreak)
+                        .where(UserStreak.id == streak.id)
+                        .values(longest_streak=streak.current_streak)
+                    )
             else:
                 # Streak broken - reset
-                streak.current_streak = 1
-                streak.last_activity_date = datetime.now()
+                self.db.execute(
+                    update(UserStreak)
+                    .where(UserStreak.id == streak.id)
+                    .values(
+                        current_streak=1,
+                        last_activity_date=datetime.now()
+                    )
+                )
         
         self.db.commit()
         self.db.refresh(streak)
@@ -238,17 +256,30 @@ class MilestoneTracker:
                 current_progress=0
             )
             self.db.add(participation)
+            self.db.flush()
         
-        participation.current_progress += progress_increment
+        self.db.execute(
+            update(ChallengeParticipation)
+            .where(ChallengeParticipation.id == participation.id)
+            .values(current_progress=ChallengeParticipation.current_progress + progress_increment)
+        )
+        self.db.flush()
+        self.db.refresh(participation)
         
         # Check if challenge is completed
         challenge = self.db.query(ReadingChallenge).filter(
             ReadingChallenge.id == challenge_id
         ).first()
         
-        if challenge and participation.current_progress >= challenge.target_value:
-            participation.is_completed = True
-            participation.completed_at = datetime.now()
+        if challenge and participation.current_progress >= challenge.target_value:  # type: ignore[operator]
+            self.db.execute(
+                update(ChallengeParticipation)
+                .where(ChallengeParticipation.id == participation.id)
+                .values(
+                    is_completed=True,
+                    completed_at=datetime.now()
+                )
+            )
         
         self.db.commit()
         self.db.refresh(participation)
@@ -307,6 +338,7 @@ class MilestoneTracker:
             ).first()
             
             progress[badge_type.value] = {
+                "badge_type": badge_type.value,
                 "unlocked": unlocked is not None,
                 "unlocked_at": unlocked.unlocked_at.isoformat() if unlocked else None,
                 "requirements": badge_progress

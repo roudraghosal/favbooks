@@ -1,232 +1,215 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FiShuffle, FiChevronRight, FiBook } from 'react-icons/fi';
-import { useAuth } from '../contexts/AuthContext';
-import { booksAPI } from '../services/api';
-import BookCard from '../components/BookCard';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import BookCard from '../components/BookCard';
 import NetflixRecommendations from '../components/NetflixRecommendations';
-import ExternalBooksSection from '../components/ExternalBooksSection';
+import { booksAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { FiSearch, FiHeart, FiCompass, FiZap, FiBook, FiTrendingUp, FiStar, FiAward } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const Home = () => {
-    const { isAuthenticated, user } = useAuth();
-    const [featuredBooks, setFeaturedBooks] = useState([]);
-    const [popularBooks, setPopularBooks] = useState([]);
-    const [recentBooks, setRecentBooks] = useState([]);
+    const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
     const [surpriseBooks, setSurpriseBooks] = useState([]);
+    const { isAuthenticated, user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        loadHomeData();
-    }, [isAuthenticated, user]);
+        loadBooks();
+    }, []);
 
-    const loadHomeData = async () => {
+    const loadBooks = async () => {
         try {
             setLoading(true);
-
-            // Only load basic books for non-authenticated users
-            // Netflix-style recommendations will load separately for authenticated users
-
-            // Load popular books (high rating + many ratings)
-            const popularResponse = await booksAPI.getBooks({
+            const response = await booksAPI.getBooks({
                 sort_by: 'rating',
                 sort_order: 'desc',
-                min_rating: 4.0,
                 page: 1,
-                size: 12
+                size: 20
             });
-            setPopularBooks(popularResponse.data.items || []);
-
-            // Load recent books
-            const recentResponse = await booksAPI.getBooks({
-                sort_by: 'created_at',
-                sort_order: 'desc',
-                page: 1,
-                size: 12
-            });
-            setRecentBooks(recentResponse.data.items || []);
-
-            // Set featured books (subset of popular books)
-            setFeaturedBooks(popularResponse.data.items?.slice(0, 6) || []);
-
+            setBooks(response.data.items || []);
         } catch (error) {
-            console.error('Error loading home data:', error);
+            console.error('Error loading books:', error);
             toast.error('Error loading books');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            navigate(`/browse-external?q=${encodeURIComponent(searchQuery)}`);
+        }
+    };
+
     const handleSurpriseMe = async () => {
         try {
-            const response = await booksAPI.surpriseMe(6, 3.5);
+            const response = await booksAPI.surpriseMe(8, 4.0);
             setSurpriseBooks(response.data || []);
-            toast.success('Surprise! Here are some great books for you!');
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            toast.success('✨ Surprise! Here are some amazing books for you!');
         } catch (error) {
             toast.error('Error getting surprise books');
         }
     };
 
-    const LoadingSkeleton = ({ count = 6 }) => (
-        <div className="book-grid">
-            {Array.from({ length: count }).map((_, index) => (
-                <div key={index} className="animate-pulse">
-                    <div className="bg-gray-700 aspect-[3/4] rounded-lg mb-4"></div>
-                    <div className="space-y-2">
-                        <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                        <div className="h-3 bg-gray-700 rounded w-2/3"></div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-
-    const BookSection = ({ title, books, linkTo, linkText, showSeeAll = true }) => (
-        <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">{title}</h2>
-                {showSeeAll && linkTo && (
-                    <Link
-                        to={linkTo}
-                        className="flex items-center space-x-1 text-spotify-light-gray hover:text-white transition-colors"
-                    >
-                        <span>{linkText}</span>
-                        <FiChevronRight size={16} />
-                    </Link>
-                )}
-            </div>
-
-            {loading ? (
-                <LoadingSkeleton />
-            ) : books.length > 0 ? (
-                <div className="book-grid">
-                    {books.map((book) => (
-                        <BookCard key={book.id} book={book} />
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-12 text-spotify-light-gray">
-                    <p>No books available at the moment.</p>
-                </div>
-            )}
-        </section>
-    );
-
     return (
         <Layout>
-            {/* Netflix-Style Recommendations for Authenticated Users */}
-            {isAuthenticated() && user ? (
-                <NetflixRecommendations />
-            ) : (
-                <>
-                    {/* Original Homepage for Non-Authenticated Users */}
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        {/* Hero Section */}
-                        <section className="mb-12">
-                            <div className="bg-gradient-to-r from-spotify-green to-green-400 rounded-2xl p-8 md:p-12 text-white">
-                                <div className="max-w-2xl">
-                                    <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                                        Discover Your Next
-                                        <span className="block text-spotify-black">Great Read</span>
-                                    </h1>
-                                    <p className="text-lg md:text-xl mb-8 text-green-100">
-                                        Get personalized book recommendations powered by AI.
-                                        Join thousands of readers finding their perfect books.
-                                    </p>
+            <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+                {/* Hero Section - WhichBook Inspired */}
+                <div className="relative overflow-hidden py-24">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5" />
+                    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                                    Find Your Perfect Book
+                                </span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+                                Discover books that match your mood, taste, and reading style
+                            </p>
 
-                                    <div className="flex flex-col sm:flex-row gap-4">
-                                        <button
-                                            onClick={handleSurpriseMe}
-                                            className="flex items-center justify-center space-x-2 bg-white text-spotify-green font-semibold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors"
-                                        >
-                                            <FiShuffle size={20} />
-                                            <span>Surprise Me!</span>
-                                        </button>
+                            {/* Discovery Methods */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+                                <button
+                                    onClick={() => navigate('/mood-discovery')}
+                                    className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
+                                    <FiHeart className="text-4xl text-white mb-4 relative z-10" />
+                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Mood-Based</h3>
+                                    <p className="text-indigo-100 relative z-10">Use sliders to find books that match your current mood</p>
+                                </button>
 
-                                        <Link
-                                            to="/browse"
-                                            className="flex items-center justify-center space-x-2 bg-spotify-green text-white font-semibold py-3 px-8 rounded-full hover:bg-green-600 transition-colors"
-                                        >
-                                            <FiBook size={20} />
-                                            <span>Browse External Books</span>
-                                        </Link>
+                                <button
+                                    onClick={() => navigate('/browse-external')}
+                                    className="group relative overflow-hidden bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
+                                    <FiCompass className="text-4xl text-white mb-4 relative z-10" />
+                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Explore Genres</h3>
+                                    <p className="text-purple-100 relative z-10">Browse through millions of books by genre and author</p>
+                                </button>
 
-                                        <Link
-                                            to="/search"
-                                            className="flex items-center justify-center space-x-2 bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-full hover:bg-white hover:text-spotify-green transition-colors"
-                                        >
-                                            <span>Search Library</span>
-                                        </Link>
+                                <button
+                                    onClick={handleSurpriseMe}
+                                    className="group relative overflow-hidden bg-gradient-to-br from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
+                                    <FiZap className="text-4xl text-white mb-4 relative z-10" />
+                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Surprise Me</h3>
+                                    <p className="text-pink-100 relative z-10">Get personalized AI-powered book recommendations</p>
+                                </button>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="max-w-2xl mx-auto">
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <FiSearch className="h-6 w-6 text-gray-400 group-hover:text-purple-400 transition-colors" />
                                     </div>
+                                    <input
+                                        type="text"
+                                        className="block w-full pl-12 pr-4 py-4 bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                                        placeholder="Search for books, authors, or genres..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter' && searchQuery) {
+                                                handleSearch();
+                                            }
+                                        }}
+                                    />
+                                    {searchQuery && (
+                                        <button
+                                            onClick={handleSearch}
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium shadow-lg"
+                                        >
+                                            Search
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                        </section>
 
-                        {/* Surprise Books */}
-                        {surpriseBooks.length > 0 && (
-                            <BookSection
-                                title="🎲 Surprise Selection"
-                                books={surpriseBooks}
-                                showSeeAll={false}
-                            />
-                        )}
-
-                        {/* External Books Section - Trending from APIs */}
-                        <ExternalBooksSection />
-
-                        {/* Featured Books */}
-                        <BookSection
-                            title="⭐ Featured Books"
-                            books={featuredBooks}
-                            linkTo="/search?sort_by=rating&sort_order=desc"
-                            linkText="See all featured"
-                        />
-
-                        {/* Popular Books */}
-                        <BookSection
-                            title="🔥 Trending Now"
-                            books={popularBooks}
-                            linkTo="/search?sort_by=rating&sort_order=desc&min_rating=4"
-                            linkText="See all trending"
-                        />
-
-                        {/* Recent Books */}
-                        <BookSection
-                            title="🆕 Recently Added"
-                            books={recentBooks}
-                            linkTo="/search?sort_by=created_at&sort_order=desc"
-                            linkText="See all recent"
-                        />
-
-                        {/* Call to Action for non-authenticated users */}
-                        <section className="bg-spotify-gray rounded-2xl p-8 md:p-12 text-center">
-                            <h2 className="text-3xl font-bold text-white mb-4">
-                                Get Personalized Recommendations
-                            </h2>
-                            <p className="text-spotify-light-gray text-lg mb-8 max-w-2xl mx-auto">
-                                Create an account to receive AI-powered book recommendations
-                                tailored to your reading preferences and history.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Link
-                                    to="/register"
-                                    className="btn-primary inline-flex items-center justify-center"
-                                >
-                                    Sign Up Free
-                                </Link>
-                                <Link
-                                    to="/login"
-                                    className="btn-secondary inline-flex items-center justify-center"
-                                >
-                                    Log In
-                                </Link>
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
+                                <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
+                                    <FiBook className="h-8 w-8 text-indigo-400 mx-auto mb-2" />
+                                    <p className="text-2xl font-bold text-white">{books.length}+</p>
+                                    <p className="text-sm text-gray-400">Books</p>
+                                </div>
+                                <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
+                                    <FiTrendingUp className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+                                    <p className="text-2xl font-bold text-white">ML</p>
+                                    <p className="text-sm text-gray-400">Powered</p>
+                                </div>
+                                <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
+                                    <FiStar className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+                                    <p className="text-2xl font-bold text-white">4.5+</p>
+                                    <p className="text-sm text-gray-400">Avg Rating</p>
+                                </div>
+                                <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
+                                    <FiAward className="h-8 w-8 text-pink-400 mx-auto mb-2" />
+                                    <p className="text-2xl font-bold text-white">10+</p>
+                                    <p className="text-sm text-gray-400">Badges</p>
+                                </div>
                             </div>
-                        </section>
+                        </div>
                     </div>
-                </>
-            )}
+                </div>
+
+                {/* AI Recommendations for Authenticated Users */}
+                {isAuthenticated && user && (
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+                        <NetflixRecommendations />
+                    </div>
+                )}
+
+                {/* Surprise Books Section */}
+                {surpriseBooks.length > 0 && (
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                                <FiZap className="text-yellow-400" />
+                                Surprise Recommendations
+                            </h2>
+                            <p className="text-gray-400">Handpicked books just for you</p>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {surpriseBooks.map((book) => (
+                                <BookCard key={book.id} book={book} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Popular Books */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="mb-8">
+                        <h2 className="text-3xl font-bold text-white mb-2">
+                            Popular Books
+                        </h2>
+                        <p className="text-gray-400">
+                            Highly rated books loved by our community
+                        </p>
+                    </div>
+
+                    {loading ? (
+                        <div className="flex items-center justify-center py-20">
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            {books.slice(0, 15).map((book) => (
+                                <BookCard key={book.id} book={book} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
         </Layout>
     );
 };

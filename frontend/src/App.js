@@ -10,9 +10,11 @@ import Register from './pages/Register';
 import BookDetails from './pages/BookDetails';
 import BrowseExternal from './pages/BrowseExternal';
 import AchievementsDashboard from './pages/AchievementsDashboard';
+import MoodBasedDiscovery from './pages/MoodBasedDiscovery';
+import Admin from './pages/Admin';
+import AdminLogin from './pages/AdminLogin';
+import Library from './pages/Library';
 // import Search from './pages/Search';
-// import Library from './pages/Library';
-// import Admin from './pages/Admin';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -40,7 +42,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 // App Router Component
 const AppRouter = () => {
     return (
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -48,28 +50,23 @@ const AppRouter = () => {
                 <Route path="/register" element={<Register />} />
 
                 {/* Protected Routes */}
-                {/* <Route 
-          path="/library" 
-          element={
-            <ProtectedRoute>
-              <Library />
-            </ProtectedRoute>
-          } 
-        /> */}
+                <Route
+                    path="/library"
+                    element={
+                        <ProtectedRoute>
+                            <Library />
+                        </ProtectedRoute>
+                    }
+                />
 
                 {/* Admin Routes */}
-                {/* <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <Admin />
-            </ProtectedRoute>
-          } 
-        /> */}
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/admin" element={<Admin />} />
 
                 {/* Public Book Routes */}
                 <Route path="/books/:id" element={<BookDetails />} />
-                <Route path="/browse" element={<BrowseExternal />} />
+                <Route path="/browse-external" element={<BrowseExternal />} />
+                <Route path="/mood-discovery" element={<MoodBasedDiscovery />} />
 
                 {/* Achievements Route */}
                 <Route

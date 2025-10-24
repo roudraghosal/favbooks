@@ -1,5 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 import os
 import pandas as pd
@@ -64,11 +65,22 @@ class RecommendationService:
         # Get books with highest average rating and most ratings
         popular_books = (
             db.query(Book)
-            .filter(Book.rating_count > 5)  # At least 5 ratings
-            .order_by(Book.average_rating.desc(), Book.rating_count.desc())
-            .limit(n_recommendations * 2)  # Get more to filter out user's books
+            .order_by(
+                func.coalesce(Book.average_rating, 0).desc(),
+                func.coalesce(Book.rating_count, 0).desc()
+            )
+            .limit(max(n_recommendations * 2, n_recommendations))
             .all()
         )
+
+        if not popular_books:
+            # Last resort: return any books available
+            popular_books = (
+                db.query(Book)
+                .order_by(Book.id.asc())
+                .limit(n_recommendations)
+                .all()
+            )
         
         # Get user's rated books to filter them out
         user_rated_books = set(
@@ -205,9 +217,8 @@ async def get_user_recommendations(
     )
     
     if not recommendations:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No recommendations available"
+        recommendations = recommendation_service.get_fallback_recommendations(
+            db, user_id, n_recommendations
         )
     
     # Fetch book details

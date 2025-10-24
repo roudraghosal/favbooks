@@ -87,78 +87,102 @@ const BrowseExternal = () => {
         }
     };
 
-    const BookCard = ({ book }) => (
-        <div className="bg-spotify-gray rounded-lg overflow-hidden hover:bg-opacity-80 transition-all duration-300 group">
-            <div className="aspect-[2/3] overflow-hidden bg-gray-800">
-                {book.cover_url ? (
-                    <img
-                        src={book.cover_url}
-                        alt={book.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://via.placeholder.com/300x450?text=No+Cover';
-                        }}
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-900">
+    const BookCard = ({ book }) => {
+        // Get proxied image URL for CORS handling
+        const getProxiedImageUrl = (url) => {
+            if (!url) return null;
+            // Convert http to https for Google Books
+            if (url.startsWith('http://books.google.com')) {
+                return url.replace('http://', 'https://');
+            }
+            // If still http (other sources), proxy it through backend
+            if (url.startsWith('http://')) {
+                return `http://localhost:8000/api/images/cover?url=${encodeURIComponent(url)}`;
+            }
+            return url;
+        };
+
+        const coverImageUrl = getProxiedImageUrl(book.cover_image_url || book.cover_url || book.thumbnail);
+
+        return (
+            <div className="bg-spotify-gray rounded-lg overflow-hidden hover:bg-opacity-80 transition-all duration-300 group">
+                <div className="aspect-[2/3] overflow-hidden bg-gray-800">
+                    {coverImageUrl ? (
+                        <img
+                            src={coverImageUrl}
+                            alt={book.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                if (e.target.nextSibling) {
+                                    e.target.nextSibling.style.display = 'flex';
+                                }
+                            }}
+                        />
+                    ) : null}
+                    <div
+                        className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-900"
+                        style={{ display: coverImageUrl ? 'none' : 'flex' }}
+                    >
                         <FiBook size={48} className="text-gray-600" />
                     </div>
-                )}
-            </div>
+                </div>
 
-            <div className="p-4">
-                <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2 h-10">
-                    {book.title}
-                </h3>
-                <p className="text-spotify-light-gray text-xs mb-2 line-clamp-1">
-                    {book.author || 'Unknown Author'}
-                </p>
+                <div className="p-4">
+                    <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2 h-10">
+                        {book.title}
+                    </h3>
+                    <p className="text-spotify-light-gray text-xs mb-2 line-clamp-1">
+                        {book.author || 'Unknown Author'}
+                    </p>
 
-                {book.average_rating && (
-                    <div className="flex items-center mb-3">
-                        <span className="text-yellow-400 text-xs">★</span>
-                        <span className="text-white text-xs ml-1">{book.average_rating.toFixed(1)}</span>
-                        {book.ratings_count && (
-                            <span className="text-spotify-light-gray text-xs ml-1">
-                                ({book.ratings_count})
-                            </span>
+                    {book.average_rating && (
+                        <div className="flex items-center mb-3">
+                            <span className="text-yellow-400 text-xs">★</span>
+                            <span className="text-white text-xs ml-1">{book.average_rating.toFixed(1)}</span>
+                            {book.ratings_count && (
+                                <span className="text-spotify-light-gray text-xs ml-1">
+                                    ({book.ratings_count})
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {book.description && (
+                        <p className="text-spotify-light-gray text-xs mb-3 line-clamp-3">
+                            {book.description}
+                        </p>
+                    )}
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => openBookReader(book)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-spotify-green text-spotify-black font-semibold py-2 px-3 rounded-full hover:scale-105 transition-transform text-sm"
+                        >
+                            <FiBookOpen size={14} />
+                            <span>Read</span>
+                        </button>
+
+                        {book.info_link && (
+                            <button
+                                onClick={() => window.open(book.info_link, '_blank')}
+                                className="flex items-center justify-center bg-spotify-gray-light text-white py-2 px-3 rounded-full hover:bg-opacity-80 transition-colors"
+                                title="More Info"
+                            >
+                                <FiExternalLink size={14} />
+                            </button>
                         )}
                     </div>
-                )}
 
-                {book.description && (
-                    <p className="text-spotify-light-gray text-xs mb-3 line-clamp-3">
-                        {book.description}
-                    </p>
-                )}
-
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => openBookReader(book)}
-                        className="flex-1 flex items-center justify-center gap-2 bg-spotify-green text-spotify-black font-semibold py-2 px-3 rounded-full hover:scale-105 transition-transform text-sm"
-                    >
-                        <FiBookOpen size={14} />
-                        <span>Read</span>
-                    </button>
-
-                    {book.info_link && (
-                        <button
-                            onClick={() => window.open(book.info_link, '_blank')}
-                            className="flex items-center justify-center bg-spotify-gray-light text-white py-2 px-3 rounded-full hover:bg-opacity-80 transition-colors"
-                            title="More Info"
-                        >
-                            <FiExternalLink size={14} />
-                        </button>
-                    )}
-                </div>
-
-                <div className="mt-2 text-xs text-spotify-light-gray">
-                    Source: {book.source === 'google_books' ? '📚 Google Books' : '📖 Open Library'}
+                    <div className="mt-2 text-xs text-spotify-light-gray">
+                        Source: {book.source === 'google_books' ? '📚 Google Books' : '📖 Open Library'}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const LoadingSkeleton = () => (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">

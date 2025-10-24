@@ -16,6 +16,16 @@ from app.core.config import settings
 
 def create_tables():
     """Create all database tables"""
+    # Import all models to register them with Base.metadata
+    # This is critical - models must be imported before create_all()
+    from app.models import (
+        User, Genre, Book, Rating, Wishlist,
+        UserAchievement, UserStreak, ReadingChallenge, 
+        ChallengeParticipation, Quiz, QuizAttempt, StickerGeneration,
+        MoodBook, Creator, CreatorContent, ContentComment, ContentLike,
+        Admin, BestsellerList, WorldMapCountry
+    )
+    
     Base.metadata.create_all(bind=engine)
     print("✅ Database tables created")
 

@@ -2,7 +2,6 @@
 Social Media Sticker Generation Service
 Generates Instagram-ready animated stickers for user achievements
 """
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
 import base64
 from typing import Optional, Dict, Any
@@ -58,18 +57,47 @@ class StickerGenerator:
     
     def __init__(self):
         """Initialize sticker generator"""
-        # Try to load fonts, fallback to default if not available
+        # Defer importing Pillow until needed. This allows the backend to
+        # start even if Pillow isn't installed. _ensure_pil() will try to
+        # import PIL and set up fonts when generating stickers.
+        self._pil_checked = False
+        self._pil_available = False
+        self.Image = None
+        self.ImageDraw = None
+        self.ImageFont = None
+        self.ImageFilter = None
+        self.title_font = None
+        self.subtitle_font = None
+        self.stats_font = None
+        self.label_font = None
+
+    def _ensure_pil(self):
+        """Lazy import PIL and initialize fonts. Sets _pil_available flag."""
+        if self._pil_checked:
+            return
+        self._pil_checked = True
         try:
-            self.title_font = ImageFont.truetype("arial.ttf", 80)
-            self.subtitle_font = ImageFont.truetype("arial.ttf", 50)
-            self.stats_font = ImageFont.truetype("arialbd.ttf", 60)
-            self.label_font = ImageFont.truetype("arial.ttf", 35)
-        except:
-            # Fallback to default font
-            self.title_font = ImageFont.load_default()
-            self.subtitle_font = ImageFont.load_default()
-            self.stats_font = ImageFont.load_default()
-            self.label_font = ImageFont.load_default()
+            from PIL import Image as PILImage, ImageDraw as PILImageDraw, ImageFont as PILImageFont, ImageFilter as PILImageFilter  # type: ignore[import-not-found]
+            self.Image = PILImage  # type: ignore[assignment]
+            self.ImageDraw = PILImageDraw  # type: ignore[assignment]
+            self.ImageFont = PILImageFont  # type: ignore[assignment]
+            self.ImageFilter = PILImageFilter  # type: ignore[assignment]
+            self._pil_available = True
+            # Try to load nicer fonts, fall back to default if unavailable
+            try:
+                self.title_font = self.ImageFont.truetype("arial.ttf", 80)
+                self.subtitle_font = self.ImageFont.truetype("arial.ttf", 50)
+                self.stats_font = self.ImageFont.truetype("arialbd.ttf", 60)
+                self.label_font = self.ImageFont.truetype("arial.ttf", 35)
+            except Exception:
+                self.title_font = self.ImageFont.load_default()
+                self.subtitle_font = self.ImageFont.load_default()
+                self.stats_font = self.ImageFont.load_default()
+                self.label_font = self.ImageFont.load_default()
+        except ImportError:
+            # Pillow is not installed; mark as unavailable. Caller should
+            # handle this case gracefully (e.g., return an error message).
+            self._pil_available = False
     
     def generate_badge_sticker(
         self,
@@ -94,9 +122,24 @@ class StickerGenerator:
         Returns:
             Dict with base64 encoded image and metadata
         """
+        # Ensure PIL is available and fonts are loaded
+        self._ensure_pil()
+        if not self._pil_available:
+            # Return a graceful error payload rather than raising ImportError
+            return {
+                "error": "Pillow (PIL) is not installed in the backend environment.",
+                "message": "Install the 'Pillow' package to enable sticker generation.",
+                "metadata": {
+                    "badge_type": badge_type,
+                    "milestone_value": milestone_value,
+                    "milestone_type": milestone_type,
+                    "generated_at": datetime.now().isoformat()
+                }
+            }
+
         # Create base image (Instagram Story size)
-        img = Image.new('RGB', (self.INSTAGRAM_STORY_WIDTH, self.INSTAGRAM_STORY_HEIGHT), (255, 255, 255))
-        draw = ImageDraw.Draw(img)
+        img = self.Image.new('RGB', (self.INSTAGRAM_STORY_WIDTH, self.INSTAGRAM_STORY_HEIGHT), (255, 255, 255))  # type: ignore[union-attr]
+        draw = self.ImageDraw.Draw(img)  # type: ignore[union-attr]
         
         # Calculate sticker position (centered)
         sticker_x = (self.INSTAGRAM_STORY_WIDTH - self.STICKER_WIDTH) // 2
@@ -107,7 +150,7 @@ class StickerGenerator:
         
         # Draw gradient background for sticker area
         self._draw_gradient_rounded_rectangle(
-            draw, 
+            draw,
             (sticker_x, sticker_y, sticker_x + self.STICKER_WIDTH, sticker_y + self.STICKER_HEIGHT),
             colors["bg"][0],
             colors["bg"][1],
