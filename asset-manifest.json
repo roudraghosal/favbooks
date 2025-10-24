@@ -1,0 +1,11 @@
+{
+  "files": {
+    "main.css": "/favbooks/static/css/main.8274179b.css",
+    "main.js": "/favbooks/static/js/main.3e97b39f.js",
+    "index.html": "/favbooks/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.8274179b.css",
+    "static/js/main.3e97b39f.js"
+  ]
+}
