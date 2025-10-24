@@ -11,6 +11,8 @@ import BookDetails from './pages/BookDetails';
 import BrowseExternal from './pages/BrowseExternal';
 import AchievementsDashboard from './pages/AchievementsDashboard';
 import MoodBasedDiscovery from './pages/MoodBasedDiscovery';
+import Resources from './pages/Resources';
+import SmartSearch from './pages/SmartSearch';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
 import Library from './pages/Library';
@@ -67,6 +69,8 @@ const AppRouter = () => {
                 <Route path="/books/:id" element={<BookDetails />} />
                 <Route path="/browse-external" element={<BrowseExternal />} />
                 <Route path="/mood-discovery" element={<MoodBasedDiscovery />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/smart-search" element={<SmartSearch />} />
 
                 {/* Achievements Route */}
                 <Route

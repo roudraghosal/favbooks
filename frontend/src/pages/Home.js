@@ -73,7 +73,17 @@ const Home = () => {
                             </p>
 
                             {/* Discovery Methods */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+                                <button
+                                    onClick={() => navigate('/smart-search')}
+                                    className="group relative overflow-hidden bg-gradient-to-br from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
+                                    <FiSearch className="text-4xl text-white mb-4 relative z-10" />
+                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Smart Search</h3>
+                                    <p className="text-green-100 relative z-10">Find books based on YouTube, Instagram, or Google interests</p>
+                                </button>
+
                                 <button
                                     onClick={() => navigate('/mood-discovery')}
                                     className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"

@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { booksAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
+import {
+    bookResourceMap,
+    genreResourceMap,
+    evergreenYoutubeChannels,
+    mediumSpotlightArticles,
+    normalizeKey,
+} from '../data/resourceRecommendations';
 
 const BookDetails = () => {
     const { id } = useParams();
@@ -14,6 +21,42 @@ const BookDetails = () => {
     const [userRating, setUserRating] = useState(0);
     const [review, setReview] = useState('');
     const [showRatingModal, setShowRatingModal] = useState(false);
+
+    const bookResources = useMemo(() => {
+        if (!book?.title) {
+            return null;
+        }
+
+        return bookResourceMap[normalizeKey(book.title)] || null;
+    }, [book]);
+
+    const genreResources = useMemo(() => {
+        if (!book?.genres?.length) {
+            return [];
+        }
+
+        const seen = new Set();
+        return book.genres
+            .map((genre) => {
+                const key = normalizeKey(genre?.name || '');
+                if (!key || seen.has(key)) {
+                    return null;
+                }
+                seen.add(key);
+                const data = genreResourceMap[key];
+                if (!data) {
+                    return null;
+                }
+
+                return {
+                    label: genre.name,
+                    ...data,
+                };
+            })
+            .filter(Boolean);
+    }, [book]);
+
+    const hasGlobalResources = evergreenYoutubeChannels.length > 0 || mediumSpotlightArticles.length > 0;
 
     useEffect(() => {
         fetchBookDetails();
@@ -291,9 +334,238 @@ const BookDetails = () => {
                                     </audio>
                                 </div>
                             )}
+
+                            {(bookResources || genreResources.length > 0) && (
+                                <div className="mt-10 space-y-8">
+                                    {bookResources && (
+                                        <section className="bg-gray-800/40 border border-gray-700 rounded-2xl p-6 space-y-6">
+                                            <div>
+                                                <h3 className="text-2xl font-bold mb-3">Deep Dives for {book.title}</h3>
+                                                <p className="text-sm text-gray-400">
+                                                    Curated interviews, reviews, and explainers tailored to this book.
+                                                </p>
+                                            </div>
+
+                                            {bookResources.insights?.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-lg font-semibold mb-2 text-green-400">Key Insights</h4>
+                                                    <ul className="list-disc list-inside text-gray-300 space-y-2">
+                                                        {bookResources.insights.map((insight, index) => (
+                                                            <li key={`insight-${index}`}>{insight}</li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {bookResources.websites?.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-lg font-semibold mb-3 text-green-400">Essential Guides & Reviews</h4>
+                                                    <div className="grid gap-4 md:grid-cols-2">
+                                                        {bookResources.websites.map((site, index) => (
+                                                            <a
+                                                                key={`site-${index}`}
+                                                                href={site.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                            >
+                                                                <div className="text-lg font-semibold text-white">{site.name}</div>
+                                                                <p className="text-sm text-gray-400 mt-1 leading-relaxed">{site.summary}</p>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {bookResources.youtube?.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-lg font-semibold mb-3 text-green-400">YouTube Deep Dives</h4>
+                                                    <div className="space-y-3">
+                                                        {bookResources.youtube.map((video, index) => (
+                                                            <a
+                                                                key={`yt-${index}`}
+                                                                href={video.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                            >
+                                                                <div>
+                                                                    <div className="text-base font-semibold text-white">{video.title}</div>
+                                                                    <div className="text-sm text-gray-400">{video.channel}</div>
+                                                                    {video.takeaway && (
+                                                                        <p className="text-sm text-gray-400 mt-2 leading-relaxed">{video.takeaway}</p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-sm text-gray-400 md:text-right">{video.duration || 'Watch now'}</div>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {bookResources.articles?.length > 0 && (
+                                                <div>
+                                                    <h4 className="text-lg font-semibold mb-3 text-green-400">Articles & Essays</h4>
+                                                    <div className="grid gap-3">
+                                                        {bookResources.articles.map((article, index) => (
+                                                            <a
+                                                                key={`article-${index}`}
+                                                                href={article.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                            >
+                                                                <div className="text-base font-semibold text-white">{article.title}</div>
+                                                                <div className="text-sm text-gray-400 mt-1">{article.outlet}</div>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </section>
+                                    )}
+
+                                    {genreResources.length > 0 && (
+                                        <section className="space-y-6">
+                                            <h3 className="text-2xl font-bold">Genre Guides</h3>
+                                            <div className="text-sm text-gray-400">
+                                                Dive deeper into the spaces your book lives in with genre-specific hubs, critical essays, and playlists.
+                                            </div>
+                                            <div className="grid gap-6">
+                                                {genreResources.map((genre) => (
+                                                    <div key={genre.label} className="bg-gray-800/40 border border-gray-700 rounded-2xl p-6 space-y-5">
+                                                        <div className="flex items-center justify-between flex-wrap gap-3">
+                                                            <h4 className="text-xl font-semibold text-green-400">{genre.label} Spotlight</h4>
+                                                            {genre.insights?.length > 0 && (
+                                                                <span className="text-xs uppercase tracking-wide text-gray-400">Actionable takeaways</span>
+                                                            )}
+                                                        </div>
+
+                                                        {genre.insights?.length > 0 && (
+                                                            <ul className="list-disc list-inside text-gray-300 space-y-2">
+                                                                {genre.insights.map((insight, index) => (
+                                                                    <li key={`${genre.label}-insight-${index}`}>{insight}</li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+
+                                                        {genre.websites?.length > 0 && (
+                                                            <div>
+                                                                <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-2">Trusted Review Hubs</h5>
+                                                                <div className="grid gap-3 md:grid-cols-2">
+                                                                    {genre.websites.map((site, index) => (
+                                                                        <a
+                                                                            key={`${genre.label}-site-${index}`}
+                                                                            href={site.url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                                        >
+                                                                            <div className="text-base font-semibold text-white">{site.name}</div>
+                                                                            <p className="text-sm text-gray-400 mt-1 leading-relaxed">{site.summary}</p>
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {genre.youtube?.length > 0 && (
+                                                            <div>
+                                                                <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-2">Watch & Learn</h5>
+                                                                <div className="space-y-3">
+                                                                    {genre.youtube.map((video, index) => (
+                                                                        <a
+                                                                            key={`${genre.label}-yt-${index}`}
+                                                                            href={video.url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                                        >
+                                                                            <div>
+                                                                                <div className="text-base font-semibold text-white">{video.title}</div>
+                                                                                <div className="text-sm text-gray-400">{video.channel}</div>
+                                                                            </div>
+                                                                            <div className="text-sm text-gray-400 md:text-right">{video.duration || 'Watch now'}</div>
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {genre.articles?.length > 0 && (
+                                                            <div>
+                                                                <h5 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-2">Longform Analysis</h5>
+                                                                <div className="grid gap-3">
+                                                                    {genre.articles.map((article, index) => (
+                                                                        <a
+                                                                            key={`${genre.label}-article-${index}`}
+                                                                            href={article.url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                                                        >
+                                                                            <div className="text-base font-semibold text-white">{article.title}</div>
+                                                                            <div className="text-sm text-gray-400 mt-1">{article.outlet}</div>
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
+                {hasGlobalResources && (
+                    <section className="mt-12 space-y-10">
+                        <div className="bg-gray-800/40 border border-gray-700 rounded-2xl p-6">
+                            <h3 className="text-2xl font-bold mb-4">BookTube Channels Worth Subscribing To</h3>
+                            <p className="text-sm text-gray-400 mb-6">
+                                Trusted creators that consistently deliver spoiler-aware, high-signal book recommendations across genres.
+                            </p>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {evergreenYoutubeChannels.map((channel) => (
+                                    <a
+                                        key={channel.name}
+                                        href={channel.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                    >
+                                        <div className="text-lg font-semibold text-white">{channel.name}</div>
+                                        <p className="text-sm text-gray-400 mt-1 leading-relaxed">{channel.focus}</p>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-800/40 border border-gray-700 rounded-2xl p-6">
+                            <h3 className="text-2xl font-bold mb-4">Medium Spotlights to Pair with Your Reading</h3>
+                            <p className="text-sm text-gray-400 mb-6">
+                                Essays to fuel reading habits, annotation strategies, and reflective note-taking.
+                            </p>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {mediumSpotlightArticles.map((article) => (
+                                    <a
+                                        key={article.url}
+                                        href={article.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block bg-gray-900/60 border border-gray-700 rounded-xl p-4 hover:border-green-500 transition"
+                                    >
+                                        <div className="text-lg font-semibold text-white">{article.title}</div>
+                                        <div className="text-sm text-gray-400 mt-1">by {article.author}</div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
             </div>
 
             {/* Rating Modal */}

@@ -90,14 +90,25 @@ const Navbar = () => {
                         </Link>
 
                         <Link
-                            to="/search"
-                            className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/search')
+                            to="/resources"
+                            className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/resources')
+                                ? 'text-spotify-green bg-spotify-gray'
+                                : 'text-spotify-light-gray hover:text-white'
+                                }`}
+                        >
+                            <FiBook size={20} />
+                            <span>Resources</span>
+                        </Link>
+
+                        <Link
+                            to="/smart-search"
+                            className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/smart-search')
                                 ? 'text-spotify-green bg-spotify-gray'
                                 : 'text-spotify-light-gray hover:text-white'
                                 }`}
                         >
                             <FiSearch size={20} />
-                            <span>Search</span>
+                            <span>Smart Search</span>
                         </Link>
 
                         {isAuthenticated() && (
@@ -222,15 +233,27 @@ const Navbar = () => {
                         </Link>
 
                         <Link
-                            to="/search"
+                            to="/resources"
                             onClick={() => setIsMenuOpen(false)}
-                            className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${isActive('/search')
+                            className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${isActive('/resources')
+                                ? 'text-spotify-green bg-spotify-gray'
+                                : 'text-spotify-light-gray'
+                                }`}
+                        >
+                            <FiBook size={20} />
+                            <span>Resources</span>
+                        </Link>
+
+                        <Link
+                            to="/smart-search"
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${isActive('/smart-search')
                                 ? 'text-spotify-green bg-spotify-gray'
                                 : 'text-spotify-light-gray'
                                 }`}
                         >
                             <FiSearch size={20} />
-                            <span>Search</span>
+                            <span>Smart Search</span>
                         </Link>
 
                         {isAuthenticated() && (
