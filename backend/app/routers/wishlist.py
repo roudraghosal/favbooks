@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.core.security import get_current_user
-from app.models import Wishlist, Book, User
-from app.schemas import WishlistCreate, Wishlist as WishlistSchema
+from backend.app.core.database import get_db
+from backend.app.core.security import get_current_user
+from backend.app.models import Wishlist, Book, User
+from backend.app.schemas import WishlistCreate, Wishlist as WishlistSchema
 
 router = APIRouter()
 

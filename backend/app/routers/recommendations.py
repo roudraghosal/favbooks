@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 import os
 import pandas as pd
 import logging
-from app.core.database import get_db
-from app.models import User, Book, Rating
-from app.schemas import BookWithRecommendationScore
+from backend.app.core.database import get_db
+from backend.app.models import User, Book, Rating
+from backend.app.schemas import BookWithRecommendationScore
 import sys
 
 # Setup logging

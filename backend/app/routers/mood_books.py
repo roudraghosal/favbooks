@@ -4,13 +4,13 @@ API routes for mood-based book recommendations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.core.database import get_db
-from app.models.whichbook import MoodBook
-from app.schemas.whichbook import (
+from backend.app.core.database import get_db
+from backend.app.models.whichbook import MoodBook
+from backend.app.schemas.whichbook import (
     MoodBookCreate, MoodBookResponse, MoodRecommendRequest, 
     WorldMapCountryResponse
 )
-from app.services.mood_recommender import MoodRecommender
+from backend.app.services.mood_recommender import MoodRecommender
 
 router = APIRouter()
 

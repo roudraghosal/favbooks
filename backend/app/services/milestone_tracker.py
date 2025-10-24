@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, update
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
-from app.models import User, Rating, Wishlist, Book
-from app.models.achievements import (
+from backend.app.models import User, Rating, Wishlist, Book
+from backend.app.models.achievements import (
     UserAchievement, UserStreak, ReadingChallenge, 
     ChallengeParticipation, Quiz, QuizAttempt,
     BadgeType, MilestoneType

@@ -8,11 +8,11 @@ from typing import List, Optional
 from datetime import datetime
 import os
 import shutil
-from app.core.database import get_db
-from app.core.security import get_password_hash, verify_password, create_access_token
-from app.models.whichbook import Creator, CreatorContent, ContentComment, ContentLike
-from app.models import User
-from app.schemas.whichbook import (
+from backend.app.core.database import get_db
+from backend.app.core.security import get_password_hash, verify_password, create_access_token
+from backend.app.models.whichbook import Creator, CreatorContent, ContentComment, ContentLike
+from backend.app.models import User
+from backend.app.schemas.whichbook import (
     CreatorCreate, CreatorLogin, CreatorResponse,
     CreatorContentCreate, CreatorContentResponse,
     PublishToFlipkartRequest,
