@@ -44,7 +44,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 // App Router Component
 const AppRouter = () => {
     return (
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Router basename="/favbooks" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />

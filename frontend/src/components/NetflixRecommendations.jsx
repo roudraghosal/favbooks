@@ -128,6 +128,11 @@ const NetflixBookRecommendations = () => {
     ];
 
     const loadAllRecommendations = useCallback(async () => {
+        if (!user || !user.id) {
+            console.warn('Cannot load recommendations: User ID not available');
+            return;
+        }
+
         // Load all recommendation systems in parallel
         const promises = recommendationSystems.map(system =>
             loadRecommendations(system)
@@ -137,13 +142,16 @@ const NetflixBookRecommendations = () => {
     }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        if (isAuthenticated() && user) {
+        if (isAuthenticated() && user && user.id) {
             loadAllRecommendations();
         }
     }, [isAuthenticated, user, loadAllRecommendations]);
 
     const loadRecommendations = async (system) => {
-        if (!user) return;
+        if (!user || !user.id) {
+            console.warn('User not available for recommendations');
+            return;
+        }
 
         setLoading(prev => ({ ...prev, [system.id]: true }));
         setErrors(prev => ({ ...prev, [system.id]: null }));
@@ -169,9 +177,11 @@ const NetflixBookRecommendations = () => {
             }));
         } catch (error) {
             console.error(`Error loading ${system.id} recommendations:`, error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Unable to load recommendations';
+            console.error(`Full error details:`, errorMsg);
             setErrors(prev => ({
                 ...prev,
-                [system.id]: 'Unable to load recommendations'
+                [system.id]: errorMsg
             }));
         } finally {
             setLoading(prev => ({ ...prev, [system.id]: false }));
