@@ -1,16 +1,7 @@
-import os
-import sys
-
-# Ensure the backend directory is on the Python path when the app is launched
-# from a parent directory (e.g., Render deployment start command).
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-if CURRENT_DIR not in sys.path:
-    sys.path.append(CURRENT_DIR)
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.routers import (
+from backend.app.core.config import settings
+from backend.app.routers import (
     auth, books, ratings, wishlist, recommendations, 
     external_books, achievements,
     mood_books, creator_portal, admin, images
@@ -72,8 +63,8 @@ async def health_check():
 @app.get("/test/books")
 async def test_books():
     """Test endpoint to check if books are available"""
-    from app.core.database import SessionLocal
-    from app.models import Book
+    from backend.app.core.database import SessionLocal
+    from backend.app.models import Book
     
     db = SessionLocal()
     try:
