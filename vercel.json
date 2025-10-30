@@ -16,8 +16,5 @@
             "source": "/(.*)",
             "destination": "/frontend/index.html"
         }
-    ],
-    "env": {
-        "DATABASE_URL": "@postgres_url"
-    }
+    ]
 }
