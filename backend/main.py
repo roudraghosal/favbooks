@@ -22,8 +22,10 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:3000",
         "http://192.168.56.1:3000",
-        "https://roudraghosal.github.io"
-    ],  # React dev servers + GitHub Pages
+        "https://roudraghosal.github.io",
+        # Add your Render frontend URL here after deployment
+        # Example: "https://favbooks-frontend.onrender.com"
+    ],  # React dev servers + GitHub Pages + Render
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
