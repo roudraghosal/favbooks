@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.core.config import settings
-from backend.app.routers import (
+from app.core.config import settings
+from app.routers import (
     auth, books, ratings, wishlist, recommendations, 
     external_books, achievements,
     mood_books, creator_portal, admin, images
@@ -67,8 +67,8 @@ async def health_check():
 @app.get("/test/books")
 async def test_books():
     """Test endpoint to check if books are available"""
-    from backend.app.core.database import SessionLocal
-    from backend.app.models import Book
+    from app.core.database import SessionLocal
+    from app.models import Book
     
     db = SessionLocal()
     try:
