@@ -1,3 +1,4 @@
 # This file exists for Render.com's Python buildpack auto-detection
 # The actual requirements are in backend/requirements.txt
 -r backend/requirements.txt
+mangum==0.17.0
