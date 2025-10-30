@@ -14,21 +14,4 @@ services:
         value: "3.11"
       - key: DATABASE_URL
         value: sqlite:///./bookdb.sqlite3
-    healthCheckPath: /
-    
-  # Frontend Static Site
-  - type: static
-    name: favbooks-frontend
-    env: static
-    region: oregon
-    plan: free
-    branch: master
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: build
-    envVars:
-      - key: REACT_APP_API_URL
-        fromService:
-          type: web
-          name: favbooks-backend
-          envVarKey: RENDER_EXTERNAL_URL
+
