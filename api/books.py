@@ -1,13 +1,12 @@
 import json
 import os
-from sqlalchemy import create_engine, and_, or_
-from sqlalchemy.orm import sessionmaker
-from app.models import Book, Genre  # Assuming these are available
+import sys
+from sqlalchemy import and_, or_
 
-# Database setup for Vercel Postgres
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/favbooks")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Add shared directory to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
+
+from models import Book, Genre, SessionLocal
 
 def handler(request, response):
     # Parse query parameters

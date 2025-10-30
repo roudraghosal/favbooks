@@ -1,15 +1,12 @@
 import json
 import os
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from app.core.security import get_password_hash
-from app.models import User
-from app.core.config import settings
+import sys
 
-# Database setup for Vercel Postgres
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/favbooks")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Add shared directory to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
+
+from models import User, SessionLocal
+from security import get_password_hash
 
 def handler(request, response):
     if request.method != "POST":
@@ -45,7 +42,7 @@ def handler(request, response):
                 email=email,
                 username=username,
                 hashed_password=hashed_password,
-                is_admin=email == settings.ADMIN_EMAIL
+                is_admin=email == "admin@bookapp.com"  # Default admin email
             )
 
             db.add(db_user)

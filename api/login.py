@@ -1,20 +1,18 @@
 import json
 import os
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from app.core.security import authenticate_user, create_access_token
-from app.models import User
+import sys
 from datetime import timedelta
-from app.core.config import settings
 
-# Database setup for Vercel Postgres
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/favbooks")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Add shared directory to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
+
+from models import SessionLocal
+from security import authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 def handler(request, response):
     if request.method != "POST":
         response.status_code = 405
+        response.headers["Content-Type"] = "application/json"
         response.body = json.dumps({"detail": "Method not allowed"})
         return
 
@@ -33,7 +31,7 @@ def handler(request, response):
                 response.body = json.dumps({"detail": "Incorrect email or password"})
                 return
 
-            access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
                 data={"sub": user.email}, expires_delta=access_token_expires
             )
