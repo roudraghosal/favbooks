@@ -4,8 +4,7 @@
     "outputDirectory": "frontend/build",
     "functions": {
         "api/**/*.py": {
-            "runtime": "python@3.9",
-            "includeFiles": "shared/**"
+            "runtime": "python@3.9"
         }
     },
     "rewrites": [
