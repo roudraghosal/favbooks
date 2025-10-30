@@ -31,7 +31,3 @@ services:
       - key: REACT_APP_API_URL
         sync: false
 
-  # PostgreSQL Database
-  - type: pserv
-    name: favbooks-db
-
