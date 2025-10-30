@@ -343,3 +343,4 @@ class StickerGenerator:
 
 # Singleton instance
 sticker_generator = StickerGenerator()
+

@@ -7,10 +7,10 @@ from sqlalchemy import update
 from typing import List, Optional
 from datetime import datetime
 
-from backend.app.core.database import get_db
-from backend.app.core.security import verify_password, create_access_token
-from backend.app.models.whichbook import Admin, CreatorContent
-from backend.app.schemas.whichbook import AdminLogin, AdminContentReview
+from app.core.database import get_db
+from app.core.security import verify_password, create_access_token
+from app.models.whichbook import Admin, CreatorContent
+from app.schemas.whichbook import AdminLogin, AdminContentReview
 
 router = APIRouter()
 
@@ -270,3 +270,4 @@ async def search_content(
     results = search_query.all()
     
     return results
+

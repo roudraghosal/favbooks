@@ -23,3 +23,4 @@ for table_name, table in Base.metadata.tables.items():
 print("\nCreating tables...")
 Base.metadata.create_all(bind=engine)
 print("✅ Tables created!")
+

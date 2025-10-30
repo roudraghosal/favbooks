@@ -18,3 +18,4 @@ print(f'Books with covers: {with_covers}')
 print(f'Books without covers: {total - with_covers}')
 
 conn.close()
+

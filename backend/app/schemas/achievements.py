@@ -195,3 +195,4 @@ class ShareStickerResponse(BaseModel):
     success: bool
     share_url: Optional[str]
     message: str
+

@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 import random
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user, get_current_admin_user
-from backend.app.models import Book, Genre, User, Rating
-from backend.app.schemas import (
+from app.core.database import get_db
+from app.core.security import get_current_user, get_current_admin_user
+from app.models import Book, Genre, User, Rating
+from app.schemas import (
     BookCreate, BookUpdate, Book as BookSchema, 
     PaginatedResponse, BookSearchParams
 )

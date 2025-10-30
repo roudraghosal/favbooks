@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import logging
 
-from backend.app.core.database import get_db
-from backend.app.models import Book, Genre
-from backend.app.schemas import BookCreate, Book as BookSchema
-from backend.app.services.external_apis import ExternalBookAPI, BookDataEnricher
+from app.core.database import get_db
+from app.models import Book, Genre
+from app.schemas import BookCreate, Book as BookSchema
+from app.services.external_apis import ExternalBookAPI, BookDataEnricher
 
 logger = logging.getLogger(__name__)
 
@@ -236,3 +236,4 @@ async def enrich_book_data(
         logger.error(f"Error enriching book: {str(e)}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Error enriching book data")
+

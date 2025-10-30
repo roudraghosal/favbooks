@@ -4,22 +4,22 @@ API routes for achievements, badges, and social stickers
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models import User
-from backend.app.models.achievements import (
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models import User
+from app.models.achievements import (
     UserAchievement, UserStreak, ReadingChallenge,
     ChallengeParticipation, Quiz, QuizAttempt, StickerGeneration
 )
-from backend.app.schemas.achievements import (
+from app.schemas.achievements import (
     Achievement, UserStreakResponse, Challenge, ChallengeCreate,
     ChallengeParticipationResponse, Quiz as QuizSchema, QuizCreate,
     QuizAttemptCreate, QuizAttemptResponse, StickerGenerateRequest,
     StickerResponse, UserStatsResponse, UserProgressResponse,
     ShareStickerRequest, ShareStickerResponse, AchievementProgressResponse
 )
-from backend.app.services.milestone_tracker import MilestoneTracker
-from backend.app.services.sticker_generator import sticker_generator
+from app.services.milestone_tracker import MilestoneTracker
+from app.services.sticker_generator import sticker_generator
 import json
 
 router = APIRouter()
@@ -412,3 +412,4 @@ async def get_my_stickers(
         ))
     
     return result
+

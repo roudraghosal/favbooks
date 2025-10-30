@@ -46,3 +46,4 @@ except Exception as e:
     db.rollback()
 finally:
     db.close()
+

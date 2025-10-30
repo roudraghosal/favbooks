@@ -104,3 +104,4 @@ async def get_placeholder_image(
             "Access-Control-Allow-Origin": "*",
         }
     )
+

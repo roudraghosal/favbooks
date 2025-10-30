@@ -171,3 +171,4 @@ class BestsellerResponse(BaseModel):
 
     class Config:
         from_attributes = True
+

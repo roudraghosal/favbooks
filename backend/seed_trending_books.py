@@ -79,3 +79,4 @@ async def add_trending_books():
 
 if __name__ == "__main__":
     asyncio.run(add_trending_books())
+

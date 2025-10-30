@@ -2,11 +2,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models import Rating, Book, User
-from backend.app.schemas import RatingCreate, Rating as RatingSchema
-from backend.app.services.milestone_tracker import MilestoneTracker
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models import Rating, Book, User
+from app.schemas import RatingCreate, Rating as RatingSchema
+from app.services.milestone_tracker import MilestoneTracker
 
 router = APIRouter()
 

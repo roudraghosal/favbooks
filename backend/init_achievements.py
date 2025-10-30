@@ -172,3 +172,4 @@ if __name__ == "__main__":
     print("3. Rate some books to unlock achievements!")
     print("4. Check /achievements page to see your progress")
     print("5. Generate social media stickers for your badges!")
+

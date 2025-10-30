@@ -1,9 +1,9 @@
 """
 Reset admin user with fresh password
 """
-from backend.app.core.database import SessionLocal
-from backend.app.models import User
-from backend.app.core.security import get_password_hash
+from app.core.database import SessionLocal
+from app.models import User
+from app.core.security import get_password_hash
 
 db = SessionLocal()
 
@@ -47,3 +47,4 @@ except Exception as e:
     db.rollback()
 finally:
     db.close()
+

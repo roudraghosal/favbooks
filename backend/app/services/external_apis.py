@@ -305,3 +305,4 @@ class BookDataEnricher:
             enriched = await BookDataEnricher.enrich_book(book)
             enriched_books.append(enriched)
         return enriched_books
+

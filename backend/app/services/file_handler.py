@@ -142,3 +142,4 @@ class FileHandler:
 
 # Global file handler instance
 file_handler = FileHandler()
+

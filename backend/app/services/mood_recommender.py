@@ -4,7 +4,7 @@ Mood-based book recommendation engine using cosine similarity
 import numpy as np
 from typing import List, Tuple
 from sqlalchemy.orm import Session
-from backend.app.models.whichbook import MoodBook
+from app.models.whichbook import MoodBook
 
 
 class MoodRecommender:
@@ -128,3 +128,4 @@ class MoodRecommender:
         ).all()
         
         return {country: count for country, count in stats}
+
