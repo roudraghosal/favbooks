@@ -20,6 +20,8 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://192.168.56.1:3000",
         "https://roudraghosal.github.io"
     ],  # React dev servers + GitHub Pages
     allow_credentials=True,
@@ -38,7 +40,7 @@ app.include_router(achievements.router, prefix="/achievements", tags=["achieveme
 
 # WhichBook+ routers
 app.include_router(mood_books.router, prefix="/api/mood", tags=["mood-discovery"])
-app.include_router(creator_portal.router, prefix="/api/creator", tags=["creator-portal"])
+app.include_router(creator_portal.router, prefix="/creator", tags=["creator-portal"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
 

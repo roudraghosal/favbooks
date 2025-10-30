@@ -97,6 +97,36 @@ export const recommendationsAPI = {
     retrainModels: () => api.post('/recommend/retrain'),
 };
 
+// Mood-based discovery API
+export const moodAPI = {
+    getMoodRecommendations: (moodSliders, limit = 20, filters = {}) => {
+        // Convert slider values (0-100) to backend scale (0-10)
+        const scaledMoods = {
+            happy: moodSliders.happy / 10,
+            sad: moodSliders.sad / 10,
+            calm: moodSliders.calm / 10,
+            thrilling: moodSliders.thrilling / 10,
+            dark: moodSliders.dark / 10,
+            funny: moodSliders.funny / 10,
+            emotional: moodSliders.emotional / 10,
+            optimistic: moodSliders.optimistic / 10
+        };
+
+        return api.post('/api/mood/recommend', {
+            mood_sliders: scaledMoods,
+            limit,
+            country_filter: filters.country || null,
+            complexity_min: filters.complexityMin || 1,
+            complexity_max: filters.complexityMax || 10
+        });
+    },
+    getAllMoodBooks: (skip = 0, limit = 100, country = null) =>
+        api.get('/api/mood/books', { params: { skip, limit, country } }),
+    getMoodBook: (bookId) => api.get(`/api/mood/books/${bookId}`),
+    autoTagMood: (description) =>
+        api.post('/api/mood/auto-tag-mood', null, { params: { description } }),
+};
+
 // Generic API helper functions
 export const apiHelpers = {
     handleError: (error) => {

@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 
@@ -12,8 +12,10 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = "admin@bookapp.com"
     ADMIN_PASSWORD: str = "admin123"
     
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
 
 
 settings = Settings()

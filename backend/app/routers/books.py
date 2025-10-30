@@ -111,6 +111,13 @@ async def get_books(
     offset = (page - 1) * size
     books = query.offset(offset).limit(size).all()
     
+    # Fix None values for average_rating and rating_count
+    for book in books:
+        if book.average_rating is None:
+            book.average_rating = 0.0  # type: ignore[assignment]
+        if book.rating_count is None:
+            book.rating_count = 0  # type: ignore[assignment]
+    
     pages = (total + size - 1) // size
     
     return PaginatedResponse(
@@ -125,21 +132,42 @@ async def get_books(
 @router.get("/search", response_model=List[BookSchema])
 async def search_books_autocomplete(
     q: Optional[str] = Query(None, description="Search query for autocomplete"),
-    limit: int = Query(10, ge=1, le=20, description="Number of suggestions"),
+    limit: int = Query(10, ge=1, le=100, description="Number of suggestions"),
+    author: Optional[str] = Query(None, description="Filter by author"),
+    min_year: Optional[int] = Query(None, description="Minimum publication year"),
+    max_year: Optional[int] = Query(None, description="Maximum publication year"),
+    min_rating: Optional[float] = Query(None, description="Minimum rating"),
+    genre: Optional[str] = Query(None, description="Filter by genre"),
     db: Session = Depends(get_db)
 ):
-    """Autocomplete search endpoint for real-time suggestions"""
+    """Search endpoint with filters for books"""
     if not q:
         return []
 
-    search_filter = or_(
-        Book.title.ilike(f"%{q}%"),
-        Book.author.ilike(f"%{q}%")
-    )
+    # Build search filter
+    filters = [
+        or_(
+            Book.title.ilike(f"%{q}%"),
+            Book.author.ilike(f"%{q}%")
+        )
+    ]
+    
+    # Add optional filters
+    if author:
+        filters.append(Book.author.ilike(f"%{author}%"))
+    if min_year:
+        filters.append(Book.publication_year >= min_year)
+    if max_year:
+        filters.append(Book.publication_year <= max_year)
+    if min_rating:
+        filters.append(Book.average_rating >= min_rating)
+    if genre:
+        # This assumes there's a genre relationship - adjust if needed
+        filters.append(Book.genres.any(Genre.name.ilike(f"%{genre}%")))
     
     books = (
         db.query(Book)
-        .filter(search_filter)
+        .filter(*filters)
         .order_by(Book.average_rating.desc())
         .limit(limit)
         .all()

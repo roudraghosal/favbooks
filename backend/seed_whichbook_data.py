@@ -2,9 +2,9 @@
 Script to populate the database with sample mood books and world map data
 """
 from sqlalchemy.orm import Session
-from app.core.database import SessionLocal
-from app.models.whichbook import MoodBook, WorldMapCountry, Admin, Creator
-from app.core.security import get_password_hash
+from backend.app.core.database import SessionLocal
+from backend.app.models.whichbook import MoodBook, WorldMapCountry, Admin, Creator
+from backend.app.core.security import get_password_hash
 from datetime import datetime
 
 def add_sample_mood_books(db: Session):

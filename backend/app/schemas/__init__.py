@@ -85,8 +85,8 @@ class BookUpdate(BaseModel):
 
 class Book(BookBase):
     id: int
-    average_rating: float
-    rating_count: int
+    average_rating: Optional[float] = 0.0
+    rating_count: Optional[int] = 0
     created_at: datetime
     genres: List[Genre] = []
 

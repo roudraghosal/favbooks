@@ -1,16 +1,34 @@
 services:
+  # Backend API Service
   - type: web
-    name: favbooks-api
+    name: favbooks-backend
     runtime: python
     region: oregon
     plan: free
     branch: master
-  rootDir: .
-  buildCommand: pip install -r backend/requirements.txt
-  startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: "3.11"
       - key: DATABASE_URL
-        value: sqlite:///./whichbook.db
-    healthCheckPath: /health
+        value: sqlite:///./bookdb.sqlite3
+    healthCheckPath: /
+    
+  # Frontend Static Site
+  - type: web
+    name: favbooks-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: favbooks-backend
+          envVarKey: RENDER_EXTERNAL_URL

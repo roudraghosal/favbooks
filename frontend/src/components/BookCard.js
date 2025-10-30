@@ -26,7 +26,8 @@ const BookCard = ({ book, showRemoveFromWishlist = false, onWishlistChange }) =>
         return url;
     };
 
-    const coverImageUrl = getProxiedImageUrl(book.cover_image_url);
+    // Support both cover_image_url (regular books) and cover_url (mood books)
+    const coverImageUrl = getProxiedImageUrl(book.cover_image_url || book.cover_url);
 
     const handleWishlistToggle = async (e) => {
         e.preventDefault();

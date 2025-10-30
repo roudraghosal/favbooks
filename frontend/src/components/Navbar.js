@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -10,15 +10,32 @@ import {
     FiMenu,
     FiX,
     FiBook,
-    FiAward
+    FiAward,
+    FiEdit,
+    FiUser,
+    FiChevronDown
 } from 'react-icons/fi';
 
 const Navbar = () => {
     const { logout, isAuthenticated, isAdmin } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
+    const userMenuRef = useRef(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -101,6 +118,17 @@ const Navbar = () => {
                         </Link>
 
                         <Link
+                            to="/creator-portal"
+                            className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-all duration-300 ${isActive('/creator-portal')
+                                ? 'text-white bg-gradient-to-r from-amber-600 to-orange-600 shadow-lg scale-105'
+                                : 'text-amber-400 hover:text-white bg-gradient-to-r from-amber-600/20 to-orange-600/20 hover:from-amber-600 hover:to-orange-600 hover:shadow-lg hover:scale-105'
+                                }`}
+                        >
+                            <FiEdit size={20} />
+                            <span className="font-semibold">Creator Portal</span>
+                        </Link>
+
+                        <Link
                             to="/smart-search"
                             className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/smart-search')
                                 ? 'text-spotify-green bg-spotify-gray'
@@ -113,48 +141,64 @@ const Navbar = () => {
 
                         {isAuthenticated() && (
                             <>
-                                <Link
-                                    to="/achievements"
-                                    className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/achievements')
-                                        ? 'text-spotify-green bg-spotify-gray'
-                                        : 'text-spotify-light-gray hover:text-white'
-                                        }`}
-                                >
-                                    <FiAward size={20} />
-                                    <span>Achievements</span>
-                                </Link>
-
-                                <Link
-                                    to="/library"
-                                    className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/library')
-                                        ? 'text-spotify-green bg-spotify-gray'
-                                        : 'text-spotify-light-gray hover:text-white'
-                                        }`}
-                                >
-                                    <FiHeart size={20} />
-                                    <span>Library</span>
-                                </Link>
-
-                                {isAdmin() && (
-                                    <Link
-                                        to="/admin"
-                                        className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${isActive('/admin')
-                                            ? 'text-spotify-green bg-spotify-gray'
-                                            : 'text-spotify-light-gray hover:text-white'
-                                            }`}
+                                {/* User Dropdown Menu */}
+                                <div className="relative" ref={userMenuRef}>
+                                    <button
+                                        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                        className="flex items-center space-x-1 px-3 py-2 rounded-lg text-spotify-light-gray hover:text-white transition-colors"
                                     >
-                                        <FiSettings size={20} />
-                                        <span>Admin</span>
-                                    </Link>
-                                )}
+                                        <FiUser size={20} />
+                                        <span>Account</span>
+                                        <FiChevronDown size={16} className={`transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                                    </button>
 
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center space-x-1 px-3 py-2 rounded-lg text-spotify-light-gray hover:text-white transition-colors"
-                                >
-                                    <FiLogOut size={20} />
-                                    <span>Logout</span>
-                                </button>
+                                    {/* Dropdown Menu */}
+                                    {isUserMenuOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-spotify-gray rounded-lg shadow-xl border border-gray-700 py-2 z-50">
+                                            <Link
+                                                to="/achievements"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                                className="flex items-center space-x-2 px-4 py-2 text-spotify-light-gray hover:text-white hover:bg-spotify-black transition-colors"
+                                            >
+                                                <FiAward size={18} />
+                                                <span>Achievements</span>
+                                            </Link>
+
+                                            <Link
+                                                to="/library"
+                                                onClick={() => setIsUserMenuOpen(false)}
+                                                className="flex items-center space-x-2 px-4 py-2 text-spotify-light-gray hover:text-white hover:bg-spotify-black transition-colors"
+                                            >
+                                                <FiHeart size={18} />
+                                                <span>My Library</span>
+                                            </Link>
+
+                                            {isAdmin() && (
+                                                <Link
+                                                    to="/admin"
+                                                    onClick={() => setIsUserMenuOpen(false)}
+                                                    className="flex items-center space-x-2 px-4 py-2 text-spotify-light-gray hover:text-white hover:bg-spotify-black transition-colors"
+                                                >
+                                                    <FiSettings size={18} />
+                                                    <span>Admin</span>
+                                                </Link>
+                                            )}
+
+                                            <hr className="my-2 border-gray-700" />
+
+                                            <button
+                                                onClick={() => {
+                                                    setIsUserMenuOpen(false);
+                                                    handleLogout();
+                                                }}
+                                                className="flex items-center space-x-2 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-spotify-black transition-colors w-full text-left"
+                                            >
+                                                <FiLogOut size={18} />
+                                                <span>Logout</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
 
@@ -242,6 +286,18 @@ const Navbar = () => {
                         >
                             <FiBook size={20} />
                             <span>Resources</span>
+                        </Link>
+
+                        <Link
+                            to="/creator-portal"
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ${isActive('/creator-portal')
+                                ? 'text-white bg-gradient-to-r from-amber-600 to-orange-600 shadow-lg'
+                                : 'text-amber-400 bg-gradient-to-r from-amber-600/20 to-orange-600/20 hover:from-amber-600 hover:to-orange-600 hover:text-white hover:shadow-lg'
+                                }`}
+                        >
+                            <FiEdit size={20} />
+                            <span className="font-semibold">Creator Portal</span>
                         </Link>
 
                         <Link

@@ -8,17 +8,17 @@ import sys
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import engine, SessionLocal
-from app.models import Base, User, Genre
-from app.core.security import get_password_hash
-from app.core.config import settings
+from backend.app.core.database import engine, SessionLocal
+from backend.app.models import Base, User, Genre
+from backend.app.core.security import get_password_hash
+from backend.app.core.config import settings
 
 
 def create_tables():
     """Create all database tables"""
     # Import all models to register them with Base.metadata
     # This is critical - models must be imported before create_all()
-    from app.models import (
+    from backend.app.models import (
         User, Genre, Book, Rating, Wishlist,
         UserAchievement, UserStreak, ReadingChallenge, 
         ChallengeParticipation, Quiz, QuizAttempt, StickerGeneration,

@@ -75,6 +75,16 @@ const Home = () => {
                             {/* Discovery Methods */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
                                 <button
+                                    onClick={() => navigate('/search')}
+                                    className="group relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
+                                    <FiBook className="text-4xl text-white mb-4 relative z-10" />
+                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Search Books</h3>
+                                    <p className="text-blue-100 relative z-10">Search by title, author, ISBN with advanced filters</p>
+                                </button>
+
+                                <button
                                     onClick={() => navigate('/smart-search')}
                                     className="group relative overflow-hidden bg-gradient-to-br from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
                                 >
@@ -95,16 +105,6 @@ const Home = () => {
                                 </button>
 
                                 <button
-                                    onClick={() => navigate('/browse-external')}
-                                    className="group relative overflow-hidden bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-                                >
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500" />
-                                    <FiCompass className="text-4xl text-white mb-4 relative z-10" />
-                                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Explore Genres</h3>
-                                    <p className="text-purple-100 relative z-10">Browse through millions of books by genre and author</p>
-                                </button>
-
-                                <button
                                     onClick={handleSurpriseMe}
                                     className="group relative overflow-hidden bg-gradient-to-br from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 rounded-2xl p-8 text-left transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
                                 >
@@ -112,6 +112,24 @@ const Home = () => {
                                     <FiZap className="text-4xl text-white mb-4 relative z-10" />
                                     <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Surprise Me</h3>
                                     <p className="text-pink-100 relative z-10">Get personalized AI-powered book recommendations</p>
+                                </button>
+                            </div>
+
+                            {/* Creator Portal Banner */}
+                            <div className="max-w-4xl mx-auto mb-12">
+                                <button
+                                    onClick={() => navigate('/creator-portal')}
+                                    className="w-full group relative overflow-hidden bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 hover:from-amber-700 hover:via-yellow-700 hover:to-orange-700 rounded-2xl p-6 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                                    <div className="flex items-center justify-center gap-4">
+                                        <FiBook className="text-4xl text-white" />
+                                        <div className="text-left">
+                                            <h3 className="text-2xl font-bold text-white mb-1">✍️ Become a Creator</h3>
+                                            <p className="text-amber-100">Share your quotes, poems, stories and get published on Flipkart!</p>
+                                        </div>
+                                        <FiStar className="text-3xl text-white animate-pulse" />
+                                    </div>
                                 </button>
                             </div>
 

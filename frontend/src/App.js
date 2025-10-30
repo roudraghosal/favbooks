@@ -13,9 +13,11 @@ import AchievementsDashboard from './pages/AchievementsDashboard';
 import MoodBasedDiscovery from './pages/MoodBasedDiscovery';
 import Resources from './pages/Resources';
 import SmartSearch from './pages/SmartSearch';
+import SearchBooks from './pages/SearchBooks';
 import Admin from './pages/Admin';
 import AdminLogin from './pages/AdminLogin';
 import Library from './pages/Library';
+import CreatorPortal from './pages/CreatorPortal';
 // import Search from './pages/Search';
 
 // Protected Route Component
@@ -43,8 +45,11 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
 // App Router Component
 const AppRouter = () => {
+    // Use basename only for GitHub Pages deployment
+    const basename = process.env.NODE_ENV === 'production' ? '/favbooks' : '';
+
     return (
-        <Router basename="/favbooks" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Router basename={basename} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -71,6 +76,8 @@ const AppRouter = () => {
                 <Route path="/mood-discovery" element={<MoodBasedDiscovery />} />
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/smart-search" element={<SmartSearch />} />
+                <Route path="/search" element={<SearchBooks />} />
+                <Route path="/creator-portal" element={<CreatorPortal />} />
 
                 {/* Achievements Route */}
                 <Route

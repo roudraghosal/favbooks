@@ -242,8 +242,8 @@ async def get_user_recommendations(
                 cover_image_url=book.cover_image_url,  # type: ignore[arg-type]
                 audio_preview_url=book.audio_preview_url,  # type: ignore[arg-type]
                 price=book.price,  # type: ignore[arg-type]
-                average_rating=book.average_rating,  # type: ignore[arg-type]
-                rating_count=book.rating_count,  # type: ignore[arg-type]
+                average_rating=book.average_rating if book.average_rating is not None else 0.0,  # type: ignore[arg-type]
+                rating_count=book.rating_count if book.rating_count is not None else 0,  # type: ignore[arg-type]
                 created_at=book.created_at,  # type: ignore[arg-type]
                 genres=[],  # Would need to fetch genres separately
                 recommendation_score=round(score, 3)
