@@ -34,7 +34,4 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: favbooks-db
-    region: oregon
-    plan: free
-    branch: master
 
