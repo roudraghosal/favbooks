@@ -1,7 +1,11 @@
-"""
-Site customization for Python path setup
-This file is automatically loaded by Python before any imports
-"""
+import sys
+import os
+
+# This file is automatically imported by Python if present in the PYTHONPATH.
+# It ensures that the backend root is always in sys.path for import resolution.
+backend_root = os.path.dirname(os.path.abspath(__file__))
+if backend_root not in sys.path:
+    sys.path.insert(0, backend_root)
 import sys
 import os
 from pathlib import Path

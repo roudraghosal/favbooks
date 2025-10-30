@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000');
 
 // Create axios instance
 const api = axios.create({
@@ -40,61 +40,61 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-    register: (userData) => api.post('/auth/register', userData),
-    login: (credentials) => api.post('/auth/login', credentials),
-    getProfile: () => api.get('/auth/me'),
+    register: (userData) => api.post('/api/auth/register', userData),
+    login: (credentials) => api.post('/api/auth/login', credentials),
+    getProfile: () => api.get('/api/auth/me'),
 };
 
 // Books API
 export const booksAPI = {
-    getBooks: (params) => api.get('/books', { params }),
-    getBook: (id) => api.get(`/books/${id}`),
-    getBookPreview: (id) => api.get(`/books/${id}/preview`),
-    createBook: (bookData) => api.post('/books', bookData),
-    updateBook: (id, bookData) => api.put(`/books/${id}`, bookData),
-    deleteBook: (id) => api.delete(`/books/${id}`),
+    getBooks: (params) => api.get('/api/books', { params }),
+    getBook: (id) => api.get(`/api/books/${id}`),
+    getBookPreview: (id) => api.get(`/api/books/${id}/preview`),
+    createBook: (bookData) => api.post('/api/books', bookData),
+    updateBook: (id, bookData) => api.put(`/api/books/${id}`, bookData),
+    deleteBook: (id) => api.delete(`/api/books/${id}`),
     searchBooks: (query, limit = 10) =>
-        api.get('/books/search', { params: { q: query, limit } }),
+        api.get('/api/books/search', { params: { q: query, limit } }),
     surpriseMe: (count = 5, minRating = 4.0) =>
-        api.get('/books/surprise', { params: { count, min_rating: minRating } }),
+        api.get('/api/books/surprise', { params: { count, min_rating: minRating } }),
 
     // External API endpoints
     searchExternal: (query, source = 'google', limit = 20) =>
-        api.get('/books/external/search', { params: { query, source, limit } }),
-    getTrending: () => api.get('/books/external/trending'),
+        api.get('/api/books/external/search', { params: { query, source, limit } }),
+    getTrending: () => api.get('/api/books/external/trending'),
     getByGenre: (genre, limit = 20) =>
-        api.get(`/books/external/genre/${genre}`, { params: { limit } }),
+        api.get(`/api/books/external/genre/${genre}`, { params: { limit } }),
     getByAuthor: (author, limit = 20) =>
-        api.get(`/books/external/author/${author}`, { params: { limit } }),
+        api.get(`/api/books/external/author/${author}`, { params: { limit } }),
     importExternal: (externalId, source) =>
-        api.post('/books/import/external', null, { params: { external_id: externalId, source } }),
-    enrichBook: (bookId) => api.post(`/books/enrich/${bookId}`),
+        api.post('/api/books/import/external', null, { params: { external_id: externalId, source } }),
+    enrichBook: (bookId) => api.post(`/api/books/enrich/${bookId}`),
 };
 
 // Ratings API
 export const ratingsAPI = {
-    createRating: (ratingData) => api.post('/ratings', ratingData),
-    getUserRatings: (userId) => api.get(`/ratings/user/${userId}`),
-    getBookRatings: (bookId) => api.get(`/ratings/book/${bookId}`),
+    createRating: (ratingData) => api.post('/api/ratings', ratingData),
+    getUserRatings: (userId) => api.get(`/api/ratings/user/${userId}`),
+    getBookRatings: (bookId) => api.get(`/api/ratings/book/${bookId}`),
 };
 
 // Wishlist API
 export const wishlistAPI = {
-    addToWishlist: (bookId) => api.post('/wishlist', { book_id: bookId }),
-    getWishlist: () => api.get('/wishlist'),
-    removeFromWishlist: (bookId) => api.delete(`/wishlist/${bookId}`),
+    addToWishlist: (bookId) => api.post('/api/wishlist', { book_id: bookId }),
+    getWishlist: () => api.get('/api/wishlist'),
+    removeFromWishlist: (bookId) => api.delete(`/api/wishlist/${bookId}`),
 };
 
 // Recommendations API
 export const recommendationsAPI = {
     getUserRecommendations: (userId, nRecommendations = 10, extraParams = {}) =>
-        api.get(`/recommend/${userId}`, {
+        api.get(`/api/recommend/${userId}`, {
             params: {
                 n_recommendations: nRecommendations,
                 ...extraParams
             }
         }),
-    retrainModels: () => api.post('/recommend/retrain'),
+    retrainModels: () => api.post('/api/recommend/retrain'),
 };
 
 // Mood-based discovery API
