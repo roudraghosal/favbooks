@@ -6,12 +6,37 @@ services:
     region: oregon
     plan: free
     branch: master
-    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
       - key: DATABASE_URL
-        value: sqlite:///./bookdb.sqlite3
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ALGORITHM
+        sync: false
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        sync: false
+
+  # Frontend Service
+  - type: web
+    name: favbooks-frontend
+    env: static
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false
+
+  # PostgreSQL Database
+  - type: pserv
+    name: favbooks-db
+    env: postgres
+    region: oregon
+    plan: free
+    branch: master
 
