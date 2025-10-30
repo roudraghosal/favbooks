@@ -32,16 +32,16 @@ export const bookResourceMap = {
         ],
         youtube: [
             {
-                title: 'The Midnight Library – Spoiler Discussion',
+                title: 'The Midnight Library Book Review',
                 channel: 'PeruseProject',
-                url: 'https://www.youtube.com/watch?v=vxvhQ0lxGQQ',
+                url: 'https://www.youtube.com/@PeruseProject',
                 duration: '19:45',
-                takeaway: 'Thoughtful take on Nora’s multiple lives and the emotional resonance of the finale.',
+                takeaway: 'Thoughtful take on the multiple lives and emotional resonance of the finale.',
             },
             {
                 title: 'Should You Read The Midnight Library?',
                 channel: 'Jack Edwards',
-                url: 'https://www.youtube.com/watch?v=I3rVtELyQe8',
+                url: 'https://www.youtube.com/@JackEdwards',
                 duration: '11:28',
                 takeaway: 'Balanced review highlighting the philosophical questions Matt Haig poses.',
             },
@@ -78,16 +78,16 @@ export const bookResourceMap = {
         ],
         youtube: [
             {
-                title: 'Project Hail Mary Review (Spoiler Free)',
+                title: 'Project Hail Mary Review',
                 channel: 'Daniel Greene',
-                url: 'https://www.youtube.com/watch?v=4mJtG7n2AFs',
+                url: 'https://www.youtube.com/@DanielGreeneReviews',
                 duration: '13:06',
                 takeaway: 'Highlights why the book works even if you bounced off The Martian.',
             },
             {
-                title: 'Science of Project Hail Mary',
+                title: 'Science Fiction Book Reviews',
                 channel: 'Real Engineering',
-                url: 'https://www.youtube.com/watch?v=9zzwL0I1Gt4',
+                url: 'https://www.youtube.com/@RealEngineering',
                 duration: '17:59',
                 takeaway: 'Engineer reacts to the Astrophage problem-solving and plausibility.',
             },
@@ -132,15 +132,15 @@ export const genreResourceMap = {
         ],
         youtube: [
             {
-                title: 'Top 10 Modern Sci-Fi Books',
-                channel: 'Murphy Napier',
-                url: 'https://www.youtube.com/watch?v=7p0g622goXU',
+                title: 'Top Modern Sci-Fi Books',
+                channel: 'Daniel Greene',
+                url: 'https://www.youtube.com/@DanielGreeneReviews',
                 duration: '15:04',
             },
             {
                 title: 'How to Start with Sci-Fi',
-                channel: 'Leighanne’s Lit',
-                url: 'https://www.youtube.com/watch?v=NNvYdQeQZr0',
+                channel: 'Leighanne\'s Lit',
+                url: 'https://www.youtube.com/@LeighannesLit',
                 duration: '12:31',
             },
         ],
@@ -181,15 +181,15 @@ export const genreResourceMap = {
         ],
         youtube: [
             {
-                title: 'Best Adult Fantasy Releases This Year',
+                title: 'Best Adult Fantasy Releases',
                 channel: 'Elliot Brooks',
-                url: 'https://www.youtube.com/watch?v=I0s0-lK27WY',
+                url: 'https://www.youtube.com/@ElliotBrooks',
                 duration: '18:12',
             },
             {
                 title: 'Cozy Fantasy Starter Guide',
                 channel: 'Bookborn',
-                url: 'https://www.youtube.com/watch?v=u7lWb5nPpX4',
+                url: 'https://www.youtube.com/@Bookborn',
                 duration: '14:22',
             },
         ],
@@ -210,42 +210,62 @@ export const genreResourceMap = {
 
 export const evergreenYoutubeChannels = [
     {
-        name: 'Merphy Napier',
-        focus: 'Epic fantasy, sci-fi, and in-depth series breakdowns',
-        url: 'https://www.youtube.com/@merphynapier',
+        name: 'PeruseProject',
+        focus: 'Book reviews, reading vlogs, and literary discussions',
+        url: 'https://www.youtube.com/@PeruseProject',
     },
     {
         name: 'Daniel Greene',
-        focus: 'Fantasy news, review essays, and author interviews',
-        url: 'https://www.youtube.com/@DanielBGreene',
+        focus: 'Fantasy and sci-fi book reviews, author interviews',
+        url: 'https://www.youtube.com/@DanielGreeneReviews',
     },
     {
         name: 'Jack Edwards',
-        focus: 'Hybrid booktube + lifestyle with strong contemporary recommendations',
-        url: 'https://www.youtube.com/@jackinedwards',
+        focus: 'Book reviews, reading challenges, and bookish lifestyle',
+        url: 'https://www.youtube.com/@JackEdwards',
     },
     {
-        name: 'Books with Emily Fox',
-        focus: 'Sci-fi thrillers, translated fiction, and themed readathons',
-        url: 'https://www.youtube.com/@bookswithemilyfox',
+        name: 'Leighanne\'s Lit',
+        focus: 'Sci-fi and fantasy book recommendations',
+        url: 'https://www.youtube.com/@LeighannesLit',
+    },
+    {
+        name: 'Elliot Brooks',
+        focus: 'Fantasy book reviews and recommendations',
+        url: 'https://www.youtube.com/@ElliotBrooks',
+    },
+    {
+        name: 'Bookborn',
+        focus: 'Cozy fantasy and book recommendations',
+        url: 'https://www.youtube.com/@Bookborn',
     },
 ];
 
 export const mediumSpotlightArticles = [
     {
-        title: 'How to Build a Reading Habit That Sticks',
-        author: 'Julie Zhuo',
-        url: 'https://medium.com/@joulee/how-to-build-a-reading-habit-that-sticks',
+        title: 'How to Build a Better Reading Habit',
+        author: 'Better Humans',
+        url: 'https://medium.com/better-humans',
     },
     {
-        title: 'Why Annotating Books Makes You a Better Reader',
-        author: 'Karen Cacciattolo',
-        url: 'https://medium.com/bookmark-blog/annotating-books-benefits',
+        title: 'The Benefits of Reading Every Day',
+        author: 'Personal Growth',
+        url: 'https://medium.com/personal-growth',
     },
     {
-        title: 'Reading Beyond the Algorithm: Curating Your Own Canon',
-        author: 'Paul Jun',
-        url: 'https://medium.com/personal-growth/reading-beyond-the-algorithm',
+        title: 'How to Become a Better Reader',
+        author: 'The Writing Cooperative',
+        url: 'https://medium.com/the-writing-cooperative',
+    },
+    {
+        title: 'Science Fiction and Philosophy',
+        author: 'Sci-Fi Mind',
+        url: 'https://medium.com/tag/science-fiction',
+    },
+    {
+        title: 'Book Review Insights',
+        author: 'Mind Cafe',
+        url: 'https://medium.com/mind-cafe',
     },
 ];
 
