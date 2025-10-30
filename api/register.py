@@ -1,12 +1,40 @@
 import json
 import os
 import sys
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, Boolean, ForeignKey, Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import and_, or_
+from sqlalchemy.sql import func
+from passlib.context import CryptContext
 
-# Add shared directory to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-from models import User, SessionLocal
-from security import get_password_hash
+# Inline models for Vercel deployment
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_admin = Column(Boolean, default=False)
+    avatar_url = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+# Database setup
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    engine = create_engine(DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+else:
+    SessionLocal = None
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
 def handler(request, response):
     if request.method != "POST":
@@ -20,6 +48,13 @@ def handler(request, response):
         email = data.get("email")
         username = data.get("username")
         password = data.get("password")
+
+        # Check database configuration
+        if not DATABASE_URL or not SessionLocal:
+            response.status_code = 500
+            response.headers["Content-Type"] = "application/json"
+            response.body = json.dumps({"detail": "Database not configured"})
+            return
 
         db = SessionLocal()
         try:
