@@ -22,7 +22,6 @@ services:
   - type: web
     name: favbooks-frontend
     env: static
-    region: oregon
     plan: free
     branch: master
     rootDir: frontend
@@ -35,7 +34,6 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: favbooks-db
-    env: postgres
     region: oregon
     plan: free
     branch: master
