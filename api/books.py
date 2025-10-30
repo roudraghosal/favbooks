@@ -4,8 +4,8 @@ from sqlalchemy import create_engine, and_, or_
 from sqlalchemy.orm import sessionmaker
 from app.models import Book, Genre  # Assuming these are available
 
-# Database setup (adapt for your environment)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./books.db")
+# Database setup for Vercel Postgres
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/favbooks")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

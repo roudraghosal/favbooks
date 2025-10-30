@@ -7,8 +7,8 @@ from app.models import User
 from datetime import timedelta
 from app.core.config import settings
 
-# Database setup
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./books.db")
+# Database setup for Vercel Postgres
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/favbooks")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

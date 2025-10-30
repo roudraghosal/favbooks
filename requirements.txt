@@ -2,3 +2,4 @@
 # The actual requirements are in backend/requirements.txt
 -r backend/requirements.txt
 mangum==0.17.0
+psycopg2-binary==2.9.7
