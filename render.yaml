@@ -2,7 +2,7 @@ services:
   # Backend API Service
   - type: web
     name: favbooks-backend
-    runtime: python
+    env: python
     region: oregon
     plan: free
     branch: master
@@ -17,9 +17,9 @@ services:
     healthCheckPath: /
     
   # Frontend Static Site
-  - type: web
+  - type: static
     name: favbooks-frontend
-    runtime: static
+    env: static
     region: oregon
     plan: free
     branch: master
