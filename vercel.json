@@ -2,7 +2,7 @@
     "version": 2,
     "buildCommand": "cd frontend && npm run build",
     "outputDirectory": "frontend/build",
-    "installCommand": "python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt",
+    "installCommand": "python3 -m pip install --upgrade pip --only-binary=all && python3 -m pip install --only-binary=all -r requirements.txt",
     "rewrites": [
         {
             "source": "/api/(.*)",
