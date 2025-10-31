@@ -36,40 +36,49 @@ else:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def handler(request, response):
-    if request.method != "POST":
-        response.status_code = 405
-        response.body = json.dumps({"detail": "Method not allowed"})
-        return
+def handler(event, context):
+    if event.get("httpMethod") != "POST":
+        return {
+            "statusCode": 405,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"detail": "Method not allowed"})
+        }
 
     try:
         # Parse JSON body
-        data = json.loads(request.body)
+        body = event.get("body", "{}")
+        if event.get("isBase64Encoded"):
+            import base64
+            body = base64.b64decode(body).decode("utf-8")
+        data = json.loads(body)
         email = data.get("email")
         username = data.get("username")
         password = data.get("password")
 
         # Check database configuration
         if not DATABASE_URL or not SessionLocal:
-            response.status_code = 500
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({"detail": "Database not configured"})
-            return
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"detail": "Database not configured"})
+            }
 
         db = SessionLocal()
         try:
             # Check if user exists
             if db.query(User).filter(User.email == email).first():
-                response.status_code = 400
-                response.headers["Content-Type"] = "application/json"
-                response.body = json.dumps({"detail": "Email already registered"})
-                return
+                return {
+                    "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"detail": "Email already registered"})
+                }
 
             if db.query(User).filter(User.username == username).first():
-                response.status_code = 400
-                response.headers["Content-Type"] = "application/json"
-                response.body = json.dumps({"detail": "Username already taken"})
-                return
+                return {
+                    "statusCode": 400,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"detail": "Username already taken"})
+                }
 
             # Create user
             hashed_password = get_password_hash(password)
@@ -84,17 +93,21 @@ def handler(request, response):
             db.commit()
             db.refresh(db_user)
 
-            response.status_code = 200
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({
-                "id": db_user.id,
-                "email": db_user.email,
-                "username": db_user.username,
-                "is_admin": db_user.is_admin
-            })
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "id": db_user.id,
+                    "email": db_user.email,
+                    "username": db_user.username,
+                    "is_admin": db_user.is_admin
+                })
+            }
         finally:
             db.close()
     except Exception as e:
-        response.status_code = 400
-        response.headers["Content-Type"] = "application/json"
-        response.body = json.dumps({"detail": str(e)})
+        return {
+            "statusCode": 400,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"detail": str(e)})
+        }

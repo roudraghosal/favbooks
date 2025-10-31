@@ -1,3 +1,6 @@
-def handler(request, response):
-    response.status_code = 200
-    response.body = "Hello from Python on Vercel!"
+def handler(event, context):
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "text/plain"},
+        "body": "Hello from Python on Vercel!"
+    }

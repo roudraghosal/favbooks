@@ -86,35 +86,38 @@ if DATABASE_URL:
 else:
     SessionLocal = None
 
-def handler(request, response):
+def handler(event, context):
     try:
         print("Books API handler called")
 
         # Check if DATABASE_URL is set
         db_url = os.getenv("DATABASE_URL")
         if not db_url:
-            response.status_code = 500
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({"error": "DATABASE_URL not configured"})
-            return
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "DATABASE_URL not configured"})
+            }
 
         if not SessionLocal:
-            response.status_code = 500
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({"error": "Database not configured"})
-            return
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "Database not configured"})
+            }
 
         print(f"DATABASE_URL found: {db_url[:50]}...")
 
-        # Parse query parameters
-        q = request.query.get("q")
-        genre = request.query.get("genre")
-        min_rating = float(request.query.get("min_rating", 0))
-        max_rating = float(request.query.get("max_rating", 5))
-        sort_by = request.query.get("sort_by", "title")
-        sort_order = request.query.get("sort_order", "asc")
-        page = int(request.query.get("page", 1))
-        size = int(request.query.get("size", 10))
+        # Parse query parameters from event
+        query_params = event.get("queryStringParameters") or {}
+        q = query_params.get("q")
+        genre = query_params.get("genre")
+        min_rating = float(query_params.get("min_rating", 0))
+        max_rating = float(query_params.get("max_rating", 5))
+        sort_by = query_params.get("sort_by", "title")
+        sort_order = query_params.get("sort_order", "asc")
+        page = int(query_params.get("page", 1))
+        size = int(query_params.get("size", 10))
 
         print(f"Query params: q={q}, genre={genre}, page={page}, size={size}")
 
@@ -162,26 +165,32 @@ def handler(request, response):
                     "genres": [{"id": g.id, "name": g.name} for g in book.genres]
                 })
 
-            response.status_code = 200
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({
-                "items": books_data,
-                "total": total,
-                "page": page,
-                "size": size,
-                "pages": (total + size - 1) // size
-            })
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "items": books_data,
+                    "total": total,
+                    "page": page,
+                    "size": size,
+                    "pages": (total + size - 1) // size
+                })
+            }
             print("Response sent successfully")
         except Exception as db_error:
             print(f"Database error: {db_error}")
-            response.status_code = 500
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({"error": f"Database error: {str(db_error)}"})
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": f"Database error: {str(db_error)}"})
+            }
         finally:
             db.close()
             print("Database session closed")
     except Exception as e:
         print(f"General error: {e}")
-        response.status_code = 500
-        response.headers["Content-Type"] = "application/json"
-        response.body = json.dumps({"error": f"Server error: {str(e)}"})
+        return {
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": f"Server error: {str(e)}"})
+        }

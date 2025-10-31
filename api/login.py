@@ -76,55 +76,66 @@ def authenticate_user(db: Session, email: str, password: str):
         return None
     return user
 
-def handler(request, response):
-    if request.method != "POST":
-        response.status_code = 405
-        response.headers["Content-Type"] = "application/json"
-        response.body = json.dumps({"detail": "Method not allowed"})
-        return
+def handler(event, context):
+    if event.get("httpMethod") != "POST":
+        return {
+            "statusCode": 405,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"detail": "Method not allowed"})
+        }
 
     try:
         # Parse JSON body
-        data = json.loads(request.body)
+        body = event.get("body", "{}")
+        if event.get("isBase64Encoded"):
+            import base64
+            body = base64.b64decode(body).decode("utf-8")
+        data = json.loads(body)
         email = data.get("email")
         password = data.get("password")
 
         # Check database configuration
         if not DATABASE_URL or not SessionLocal:
-            response.status_code = 500
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({"detail": "Database not configured"})
-            return
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"detail": "Database not configured"})
+            }
 
         db = SessionLocal()
         try:
             user = authenticate_user(db, email, password)
             if not user:
-                response.status_code = 401
-                response.headers["Content-Type"] = "application/json"
-                response.body = json.dumps({"detail": "Incorrect email or password"})
-                return
+                return {
+                    "statusCode": 401,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"detail": "Incorrect email or password"})
+                }
 
             access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
                 data={"sub": user.email}, expires_delta=access_token_expires
             )
 
-            response.status_code = 200
-            response.headers["Content-Type"] = "application/json"
-            response.body = json.dumps({
-                "access_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "username": user.username,
-                    "is_admin": user.is_admin
-                }
-            })
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "access_token": access_token,
+                    "token_type": "bearer",
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "username": user.username,
+                        "is_admin": user.is_admin
+                    }
+                })
+            }
         finally:
             db.close()
     except Exception as e:
-        response.status_code = 400
-        response.headers["Content-Type"] = "application/json"
-        response.body = json.dumps({"detail": str(e)})
+        return {
+            "statusCode": 400,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"detail": str(e)})
+        }

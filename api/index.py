@@ -1,6 +1,8 @@
 import json
 
-def handler(request, response):
-    response.status_code = 200
-    response.headers["Content-Type"] = "application/json"
-    response.body = json.dumps({"message": "Welcome to the Book Recommendation API"})
+def handler(event, context):
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"message": "Welcome to the Book Recommendation API"})
+    }
