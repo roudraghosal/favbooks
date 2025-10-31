@@ -7,6 +7,14 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import and_, or_
 from sqlalchemy.sql import func
 
+# Ensure psycopg2cffi is used for PostgreSQL connections
+try:
+    import psycopg2cffi as psycopg2
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+except ImportError:
+    pass
+
 # Inline models for Vercel deployment
 Base = declarative_base()
 
@@ -81,7 +89,10 @@ class User(Base):
 # Database setup
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
-    engine = create_engine(DATABASE_URL)
+    # Ensure we use psycopg2cffi for PostgreSQL connections
+    if DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2cffi://")
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 else:
     SessionLocal = None
