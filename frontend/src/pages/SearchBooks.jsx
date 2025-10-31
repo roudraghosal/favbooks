@@ -38,7 +38,7 @@ const SearchBooks = () => {
 
         try {
             setLoading(true);
-            const res = await api.get('/books/search', {
+            const res = await api.get('/api/books/search', {
                 params: {
                     q: query,
                     limit: 50,
@@ -134,8 +134,8 @@ const SearchBooks = () => {
                                         type="button"
                                         onClick={() => setShowFilters(!showFilters)}
                                         className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${showFilters || hasActiveFilters
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                            ? 'bg-purple-600 text-white'
+                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                             }`}
                                     >
                                         <FiFilter className="w-4 h-4" />

@@ -66,7 +66,7 @@ const BookDetails = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await api.get(`/books/${id}`);
+            const response = await api.get(`/api/books/${id}`);
             setBook(response.data);
             setLoading(false);
         } catch (err) {

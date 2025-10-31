@@ -64,7 +64,7 @@ const SmartSearch = () => {
         try {
             // Search for books based on patterns
             const searchQuery = topKeywords.join(' ');
-            const response = await api.get('/books/search', {
+            const response = await api.get('/api/books/search', {
                 params: { q: searchQuery, limit: 8 }
             });
 
@@ -92,7 +92,7 @@ const SmartSearch = () => {
         setLoading(true);
         try {
             // Search for books based on the query
-            const response = await api.get('/books/search', {
+            const response = await api.get('/api/books/search', {
                 params: { q: searchQuery, limit: 20 }
             });
 

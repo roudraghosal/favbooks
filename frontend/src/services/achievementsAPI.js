@@ -6,13 +6,13 @@ import api from './api';
 export const achievementsAPI = {
     // Get user statistics
     getUserStats: async () => {
-        const response = await api.get('/achievements/stats');
+        const response = await api.get('/api/achievements/stats');
         return response.data;
     },
 
     // Get user achievements
     getUserAchievements: async () => {
-        const response = await api.get('/achievements/achievements');
+        const response = await api.get('/api/achievements/achievements');
         return response.data;
     },
 
@@ -24,13 +24,13 @@ export const achievementsAPI = {
 
     // Get achievement progress
     getProgress: async () => {
-        const response = await api.get('/achievements/progress');
+        const response = await api.get('/api/achievements/progress');
         return response.data;
     },
 
     // Get reading streak
     getStreak: async () => {
-        const response = await api.get('/achievements/streak');
+        const response = await api.get('/api/achievements/streak');
         return response.data;
     },
 
@@ -42,7 +42,7 @@ export const achievementsAPI = {
 
     // Get active challenges
     getChallenges: async () => {
-        const response = await api.get('/achievements/challenges');
+        const response = await api.get('/api/achievements/challenges');
         return response.data;
     },
 
@@ -54,13 +54,13 @@ export const achievementsAPI = {
 
     // Get user's challenges
     getMyChallenges: async () => {
-        const response = await api.get('/achievements/challenges/my');
+        const response = await api.get('/api/achievements/challenges/my');
         return response.data;
     },
 
     // Get available quizzes
     getQuizzes: async () => {
-        const response = await api.get('/achievements/quizzes');
+        const response = await api.get('/api/achievements/quizzes');
         return response.data;
     },
 
@@ -96,7 +96,7 @@ export const achievementsAPI = {
 
     // Get user's stickers
     getMyStickers: async () => {
-        const response = await api.get('/achievements/stickers/my');
+        const response = await api.get('/api/achievements/stickers/my');
         return response.data;
     }
 };

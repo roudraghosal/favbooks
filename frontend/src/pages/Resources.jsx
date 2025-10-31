@@ -17,7 +17,7 @@ const Resources = () => {
             try {
                 setLoading(true);
                 // Request more books with pagination
-                const res = await api.get('/books', {
+                const res = await api.get('/api/books', {
                     params: {
                         page: 1,
                         size: 100,

@@ -40,17 +40,17 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router, prefix="/auth", tags=["authentication"])
-app.include_router(books.router, prefix="/books", tags=["books"])
-app.include_router(external_books.router, prefix="/books", tags=["external-books"])
-app.include_router(ratings.router, prefix="/ratings", tags=["ratings"])
-app.include_router(wishlist.router, prefix="/wishlist", tags=["wishlist"])
-app.include_router(recommendations.router, prefix="/recommend", tags=["recommendations"])
-app.include_router(achievements.router, prefix="/achievements", tags=["achievements"])
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+app.include_router(books.router, prefix="/api/books", tags=["books"])
+app.include_router(external_books.router, prefix="/api/books", tags=["external-books"])
+app.include_router(ratings.router, prefix="/api/ratings", tags=["ratings"])
+app.include_router(wishlist.router, prefix="/api/wishlist", tags=["wishlist"])
+app.include_router(recommendations.router, prefix="/api/recommend", tags=["recommendations"])
+app.include_router(achievements.router, prefix="/api/achievements", tags=["achievements"])
 
 # WhichBook+ routers
 app.include_router(mood_books.router, prefix="/api/mood", tags=["mood-discovery"])
-app.include_router(creator_portal.router, prefix="/creator", tags=["creator-portal"])
+app.include_router(creator_portal.router, prefix="/api/creator", tags=["creator-portal"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
 

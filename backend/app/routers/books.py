@@ -53,7 +53,6 @@ async def create_book(
     return db_book
 
 
-@router.get("/", response_model=PaginatedResponse)
 @router.get("", response_model=PaginatedResponse)  # Handle both with and without trailing slash
 async def get_books(
     q: Optional[str] = Query(None, description="Search query"),
