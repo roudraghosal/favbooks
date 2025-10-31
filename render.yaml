@@ -22,7 +22,6 @@ services:
   - type: web
     name: favbooks-frontend
     env: static
-    plan: free
     branch: master
     rootDir: frontend
     buildCommand: npm install && npm run build
